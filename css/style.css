@@ -1,0 +1,957 @@
+/* =========================================
+   二次元正太风个人起始页 —— 全局配色与背景
+   气质：晨光薄纱 · 棉花糖融化 · 奶白温润
+   ========================================= */
+
+/* ---------- 1.  reset & 奶白基底 ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    color: #5A4A42;
+    /* 淡蓝 → 奶白 → 淡粉，135°左上到右下，色阶极其柔和 */
+    background: linear-gradient(
+        135deg,
+        #E8F0F5 0%,
+        #FFFBF5 45%,
+        #FDF2F0 100%
+    );
+    background-attachment: fixed;
+    overflow-x: hidden;
+}
+
+/* ---------- 2. 动效预留接口 ---------- */
+:root {
+    /* 强调色 */
+    --accent: #FFB7A5;
+    --accent-soft: rgba(255, 183, 165, 0.25);
+    --accent-glow: rgba(255, 183, 165, 0.35);
+    --accent-hover: rgba(255, 183, 165, 0.15);
+
+    /* 文字层级 */
+    --text-main: #5A4A42;
+    --text-sub: #9E8E86;
+    --text-placeholder: #C4B5AD;
+
+    /* 卡片与表面 */
+    --surface: rgba(255, 255, 255, 0.6);
+    --surface-hover: rgba(255, 255, 255, 0.75);
+    --border-light: rgba(255, 255, 255, 0.85);
+
+    /* 阴影（极淡弥散） */
+    --shadow-float: 0 8px 32px rgba(90, 74, 66, 0.05);
+    --shadow-hover: 0 12px 40px rgba(90, 74, 66, 0.08);
+    --shadow-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+
+    /* 圆角尺度 */
+    --radius-card: 24px;
+    --radius-pill: 9999px;
+
+    /* 过渡曲线（弹性） */
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 通用过渡 —— 为后续 JS 交互预留 */
+* {
+    transition: background-color 0.3s var(--ease-soft),
+                box-shadow 0.3s var(--ease-soft),
+                transform 0.3s var(--ease-bounce),
+                opacity 0.3s var(--ease-soft);
+}
+
+/* ---------- 3. 背景呼吸动画 ---------- */
+@keyframes breathe {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.03);
+    }
+}
+
+body {
+    /* 后续可通过 JS 切换类名启动呼吸 */
+    animation: breathe 8s ease-in-out infinite paused;
+}
+
+body.is-breathing {
+    animation-play-state: running;
+}
+
+/* ---------- 4. 容器卡片 ---------- */
+.container {
+    max-width: 520px;
+    padding: 48px 40px;
+    text-align: center;
+
+    /* 半透明白色 + 毛玻璃 */
+    background: var(--surface);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+
+    /* 极淡白光内描边 + 弥散阴影 */
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-inner), var(--shadow-float);
+
+    /* 居中定位 */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+}
+
+/* ---------- 5. 时钟 ---------- */
+#clock {
+    font-size: 56px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: var(--text-main);
+    margin-bottom: 28px;
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- 6. 搜索区域 ---------- */
+.search-box {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 24px;
+}
+
+/* 搜索栏外框（左侧引擎 + 右侧输入） */
+.search-field {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 4px 4px 4px 8px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-inner), var(--shadow-float);
+    transition: box-shadow 0.3s var(--ease-soft), background 0.3s var(--ease-soft);
+}
+
+.search-field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-glow), var(--shadow-hover);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* 输入框 */
+#search {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 18px 10px 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    transition: opacity 0.15s var(--ease-soft);
+}
+
+#search::placeholder {
+    color: var(--text-placeholder);
+}
+
+/* placeholder 切换时的淡出状态 */
+#search.is-switching {
+    opacity: 0.35;
+}
+
+/* ---------- 6.1 搜索引擎选择器 ---------- */
+.engine-selector {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* 当前引擎按钮 */
+.engine-current {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: var(--shadow-inner);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.engine-current:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.engine-current:focus-visible {
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.engine-current.is-open .engine-arrow {
+    transform: rotate(180deg);
+}
+
+.engine-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.engine-name {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.engine-arrow {
+    margin-left: 1px;
+    opacity: 0.55;
+    transition: transform 0.25s var(--ease-bounce), opacity 0.2s;
+}
+
+/* 引擎下拉浮层（像轻轻飘落的便签纸） */
+.engine-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 170px;
+    padding: 8px;
+    margin: 0;
+    list-style: none;
+
+    background: rgba(255, 251, 245, 0.92);
+    backdrop-filter: blur(12px) saturate(1.1);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(90, 74, 66, 0.06);
+
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top left;
+    pointer-events: none;
+    z-index: 200;
+
+    transition: all 0.25s var(--ease-bounce);
+}
+
+.engine-dropdown.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.engine-dropdown li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-main);
+    transition: background 0.2s var(--ease-soft);
+}
+
+.engine-dropdown li:hover {
+    background: var(--accent-hover);
+}
+
+/* 选中标记：小圆点 */
+.engine-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.25s var(--ease-bounce);
+}
+
+.engine-dropdown li.is-active .engine-dot {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.engine-dropdown li .engine-label {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.engine-dropdown li .engine-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* 搜索建议下拉 */
+.suggestions {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 10px 0;
+    list-style: none;
+    text-align: left;
+
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    box-shadow: var(--shadow-inner), var(--shadow-float);
+
+    display: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    z-index: 100;
+}
+
+.suggestions.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.suggestions li {
+    padding: 10px 24px;
+    font-size: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+    border-radius: 0;
+}
+
+.suggestions li:hover,
+.suggestions li.active {
+    background: var(--accent-soft);
+    color: var(--text-main);
+}
+
+/* 首末项圆角补全 */
+.suggestions li:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.suggestions li:last-child {
+    border-radius: 0 0 12px 12px;
+}
+
+/* ---------- 7. 快捷链接卡片 ---------- */
+.links {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    justify-content: center;
+    gap: 24px;
+    margin-top: 4px;
+}
+
+.link-card a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 16px rgba(90, 74, 66, 0.04);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s var(--ease-soft);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.link-card a:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 12px 32px rgba(90, 74, 66, 0.06);
+}
+
+.link-card a:hover svg {
+    animation: iconWiggle 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.link-card:active a {
+    transform: translateY(-12px) scale(0.95);
+}
+
+/* 入场动画 —— 奇数项偏上、偶数项偏下，动画结束后停在各自偏移位置 */
+@keyframes cardEnterUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(-4px); }
+}
+@keyframes cardEnterDown {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(4px); }
+}
+
+.link-card:nth-child(odd) {
+    animation: cardEnterUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.link-card:nth-child(even) {
+    animation: cardEnterDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.link-card:nth-child(1) { animation-delay: 0s; }
+.link-card:nth-child(2) { animation-delay: 0.1s; }
+.link-card:nth-child(3) { animation-delay: 0.2s; }
+.link-card:nth-child(4) { animation-delay: 0.3s; }
+
+/* 图标摇晃 */
+@keyframes iconWiggle {
+    0%   { transform: rotate(0deg); }
+    25%  { transform: rotate(-8deg); }
+    50%  { transform: rotate(8deg); }
+    75%  { transform: rotate(-4deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.link-card svg {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+/* ---------- 7.5 书签网格 ---------- */
+.bookmark-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    justify-content: center;
+    gap: 28px 20px;
+    margin: 12px 0 20px;
+}
+
+/* 单个书签卡片 */
+.bookmark-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* 圆形图标容器 */
+.bookmark-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s var(--ease-soft);
+}
+
+.bookmark-card:hover .bookmark-icon-wrap {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* favicon 图标 */
+.bookmark-favicon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+/* 首字母 fallback */
+.bookmark-initial {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 183, 165, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 500;
+    color: #5A4A42;
+    line-height: 1;
+}
+
+/* 网站名称 */
+.bookmark-name {
+    font-size: 12px;
+    color: #5A4A42;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 10px;
+    letter-spacing: 0.02em;
+    text-align: center;
+}
+
+/* 编辑 & 删除按钮 */
+.bookmark-action {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.2s, transform 0.2s, background 0.2s;
+    z-index: 5;
+    padding: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    line-height: 1;
+}
+
+.bookmark-action svg {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+}
+
+.bookmark-card:hover .bookmark-action {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.bookmark-action:hover {
+    background: rgba(255, 183, 165, 0.3);
+}
+
+.bookmark-edit {
+    bottom: 2px;
+    right: -2px;
+}
+
+.bookmark-delete {
+    bottom: -4px;
+    right: -8px;
+}
+
+/* 添加按钮 */
+.bookmark-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bookmark-add-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px dashed rgba(90, 74, 66, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #5A4A42;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                border-color 0.3s var(--ease-soft),
+                background 0.3s var(--ease-soft),
+                color 0.3s var(--ease-soft);
+}
+
+.bookmark-add-btn span {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bookmark-add-btn:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255, 183, 165, 0.5);
+    border-style: solid;
+    background: rgba(255, 183, 165, 0.12);
+}
+
+.bookmark-add-btn:hover span {
+    transform: rotate(90deg);
+}
+
+.bookmark-add-label {
+    font-size: 12px;
+    color: #5A4A42;
+    opacity: 0.5;
+    margin-top: 10px;
+}
+
+/* 空状态 */
+.bookmark-empty {
+    text-align: center;
+    color: #5A4A42;
+    opacity: 0.3;
+    font-size: 14px;
+    padding: 20px 0;
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+}
+
+/* 删除动画 */
+@keyframes bookmarkRemove {
+    to {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}
+
+.bookmark-card.removing {
+    animation: bookmarkRemove 0.25s var(--ease-soft) forwards;
+    pointer-events: none;
+}
+
+/* 入场动画 */
+@keyframes bookmarkEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bookmark-card.entering {
+    animation: bookmarkEnter 0.4s var(--ease-soft) both;
+}
+
+/* ---------- 弹窗 ---------- */
+.bm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(90, 74, 66, 0.15);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease-soft);
+}
+
+.bm-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.bm-modal {
+    background: rgba(255, 251, 245, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    padding: 32px;
+    width: 320px;
+    max-width: 90vw;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.3s var(--ease-soft);
+}
+
+.bm-overlay.open .bm-modal {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.bm-modal h3 {
+    font-size: 18px;
+    font-weight: 400;
+    color: #5A4A42;
+    margin: 0 0 24px;
+    text-align: center;
+}
+
+/* 图标预览 */
+.bm-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 183, 165, 0.3);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.bm-preview:hover {
+    border-color: rgba(255, 183, 165, 0.6);
+}
+
+.bm-preview img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+/* 输入框 */
+.bm-field {
+    display: block;
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #5A4A42;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(90, 74, 66, 0.03);
+    transition: box-shadow 0.25s var(--ease-soft),
+                border-color 0.25s var(--ease-soft);
+}
+
+.bm-field:focus {
+    border-color: rgba(255, 183, 165, 0.5);
+    box-shadow: 0 0 0 3px rgba(255, 183, 165, 0.2);
+}
+
+.bm-field::placeholder {
+    color: #C4B5AD;
+}
+
+/* 提交按钮 */
+.bm-submit {
+    display: block;
+    width: 100%;
+    height: 44px;
+    margin-top: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #fff;
+    background: #FFB7A5;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 183, 165, 0.3);
+}
+
+.bm-submit:hover {
+    filter: brightness(1.08);
+}
+
+.bm-submit:active {
+    transform: scale(0.97);
+}
+
+/* 取消按钮 */
+.bm-cancel {
+    display: block;
+    width: 100%;
+    height: 36px;
+    margin-top: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #9E8E86;
+    background: transparent;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.bm-cancel:hover {
+    color: #5A4A42;
+}
+
+/* ---------- 8. 弹性悬停动效预留 ---------- */
+@keyframes softPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* JS 可通过添加类名触发 */
+.is-pulsing {
+    animation: softPulse 0.4s var(--ease-bounce);
+}
+
+.is-floating {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* ---------- 9. 响应式微调 ---------- */
+@media (max-width: 480px) {
+    .container {
+        padding: 36px 24px;
+        border-radius: 20px;
+    }
+
+    #clock {
+        font-size: 42px;
+    }
+
+    .engine-name {
+        display: none;
+    }
+
+    .engine-current {
+        padding: 7px 8px;
+    }
+
+    #search {
+        padding: 10px 14px 10px 8px;
+    }
+
+    .links {
+        grid-template-columns: repeat(4, 64px);
+        gap: 16px;
+    }
+
+    .link-card a {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+    }
+
+    .link-card svg {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+
+/* ---------- 10. 背景氛围层 ---------- */
+
+/* 子系统 A + B 共用：固定全屏、不响应事件、隔离在内容之下 */
+.ambient-base,
+.ambient-blobs,
+.ambient-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ---- 子系统 A：呼吸式渐变光斑 ---- */
+
+/* 保险底色，防止光斑移开后露白；使用与 body 同款渐变，保留原有色阶 */
+.ambient-base {
+    z-index: 0;
+    background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
+    background-attachment: fixed;
+}
+
+/* 光斑层 */
+.ambient-blobs {
+    z-index: 1;
+}
+
+.ambient-blob {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+    /* 大半径高斯模糊，制造棉花糖般的融化边缘 */
+    filter: blur(50px);
+}
+
+/* 婴儿蓝光斑：主体落在屏幕左上到中区域，与粉光斑在中央重叠 */
+.ambient-blob--blue {
+    width: 95vmax;
+    height: 95vmax;
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(
+        circle,
+        rgba(200, 220, 245, 0.25) 0%,
+        rgba(200, 220, 245, 0) 50%
+    );
+    animation: blobDrift1 26s ease-in-out infinite alternate;
+}
+
+/* 樱花粉光斑：主体落在屏幕右下到中区域，与蓝光斑在中央融合 */
+.ambient-blob--pink {
+    width: 105vmax;
+    height: 105vmax;
+    top: -15%;
+    left: 40%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 190, 205, 0.25) 0%,
+        rgba(255, 190, 205, 0) 50%
+    );
+    animation: blobDrift2 34s ease-in-out infinite alternate;
+}
+
+/* 光斑 1：从左上向右下漂移，与粉光斑在画面中央交汇 */
+@keyframes blobDrift1 {
+    0% {
+        transform: translate3d(0, 0, 0) scale(0.92);
+    }
+    100% {
+        transform: translate3d(22vw, 14vh, 0) scale(1.08);
+    }
+}
+
+/* 光斑 2：从右下向左上漂移，与蓝光斑在画面中央交汇 */
+@keyframes blobDrift2 {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1.06);
+    }
+    100% {
+        transform: translate3d(-22vw, -12vh, 0) scale(0.9);
+    }
+}
+
+/* ---- 子系统 B：漂浮微粒（阳光尘埃） ---- */
+
+.ambient-particles {
+    z-index: 2;
+}
+
+.ambient-particle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    will-change: transform;
+}

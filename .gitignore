@@ -1,0 +1,16 @@
+# 本地服务器
+node_modules/
+startpage.zip
+startpage/
+
+# Claude Code 配置
+.claude/
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器
+.vscode/
+*.swp
