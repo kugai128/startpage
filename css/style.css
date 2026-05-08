@@ -358,82 +358,7 @@ body.is-breathing {
     border-radius: 0 0 12px 12px;
 }
 
-/* ---------- 7. 快捷链接卡片 ---------- */
-.links {
-    display: grid;
-    grid-template-columns: repeat(4, 80px);
-    justify-content: center;
-    gap: 24px;
-    margin-top: 4px;
-}
-
-.link-card a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 4px 16px rgba(90, 74, 66, 0.04);
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.35s var(--ease-soft);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.link-card a:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 12px 32px rgba(90, 74, 66, 0.06);
-}
-
-.link-card a:hover svg {
-    animation: iconWiggle 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.link-card:active a {
-    transform: translateY(-12px) scale(0.95);
-}
-
-/* 入场动画 —— 奇数项偏上、偶数项偏下，动画结束后停在各自偏移位置 */
-@keyframes cardEnterUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(-4px); }
-}
-@keyframes cardEnterDown {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(4px); }
-}
-
-.link-card:nth-child(odd) {
-    animation: cardEnterUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-.link-card:nth-child(even) {
-    animation: cardEnterDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-.link-card:nth-child(1) { animation-delay: 0s; }
-.link-card:nth-child(2) { animation-delay: 0.1s; }
-.link-card:nth-child(3) { animation-delay: 0.2s; }
-.link-card:nth-child(4) { animation-delay: 0.3s; }
-
-/* 图标摇晃 */
-@keyframes iconWiggle {
-    0%   { transform: rotate(0deg); }
-    25%  { transform: rotate(-8deg); }
-    50%  { transform: rotate(8deg); }
-    75%  { transform: rotate(-4deg); }
-    100% { transform: rotate(0deg); }
-}
-
-.link-card svg {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-}
+/* === 移除旧图标：旧 .links / .link-card 样式已全部清除 === */
 
 /* ---------- 7.5 书签网格 ---------- */
 .bookmark-grid {
@@ -476,18 +401,35 @@ body.is-breathing {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* favicon 图标 */
+/* === favicon 圆形适配 === */
+
+/* favicon 外层圆形遮罩（48px，在 64px 容器内留出呼吸边距） */
+.bookmark-favicon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+}
+
+/* favicon 图片：填满圆形遮罩，居中裁切 */
 .bookmark-favicon {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
     pointer-events: none;
+    display: block;
 }
 
 /* 首字母 fallback */
 .bookmark-initial {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: rgba(255, 183, 165, 0.12);
     display: flex;
@@ -497,6 +439,7 @@ body.is-breathing {
     font-weight: 500;
     color: #5A4A42;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 /* 网站名称 */
@@ -840,22 +783,6 @@ body.is-breathing {
 
     #search {
         padding: 10px 14px 10px 8px;
-    }
-
-    .links {
-        grid-template-columns: repeat(4, 64px);
-        gap: 16px;
-    }
-
-    .link-card a {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-    }
-
-    .link-card svg {
-        width: 26px;
-        height: 26px;
     }
 }
 

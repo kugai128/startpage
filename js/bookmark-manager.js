@@ -31,6 +31,12 @@
     try { return new URL(url).hostname; } catch (e) { return ''; }
   }
 
+  /* === favicon 圆形适配：B站检测 === */
+  function isBilibili(url) {
+    var d = getDomain(url);
+    return /bilibili|b23\.tv/i.test(d);
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -101,7 +107,10 @@
     wrap.href = bm.url;
     wrap.setAttribute('aria-label', bm.name);
 
-    if (bm.iconUrl) {
+    /* === favicon 圆形适配：圆形遮罩 + B站首字母兜底 === */
+    if (bm.iconUrl && !isBilibili(bm.url)) {
+      var mask = document.createElement('div');
+      mask.className = 'bookmark-favicon-wrap';
       var img = document.createElement('img');
       img.className = 'bookmark-favicon';
       img.src = bm.iconUrl;
@@ -109,7 +118,8 @@
       img.onerror = function () {
         showInitial(wrap, bm.name);
       };
-      wrap.appendChild(img);
+      mask.appendChild(img);
+      wrap.appendChild(mask);
     } else {
       showInitial(wrap, bm.name);
     }
@@ -150,9 +160,12 @@
     return card;
   }
 
+  /* === favicon 圆形适配：fallback 时移除整个遮罩层 === */
   function showInitial(wrap, name) {
-    // 移除可能已有的 favicon
-    var old = wrap.querySelector('.bookmark-favicon');
+    // 移除可能已有的 favicon 遮罩层
+    var oldMask = wrap.querySelector('.bookmark-favicon-wrap');
+    if (oldMask) oldMask.remove();
+    var old = wrap.querySelector('.bookmark-initial');
     if (old) old.remove();
     var div = document.createElement('div');
     div.className = 'bookmark-initial';
