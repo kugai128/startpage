@@ -455,11 +455,12 @@ body.is-breathing {
 
 /* === 移除旧图标：旧 .links / .link-card 样式已全部清除 === */
 
-/* === 卡片固定尺寸与书签内部滚动 === */
+/* === 书签网格始终居中 === */
 .bookmark-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 12px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 16px;
     width: 100%;
     max-height: 100%;
     overflow-y: auto;
