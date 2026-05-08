@@ -154,6 +154,29 @@ body.is-breathing {
     100% { transform: scale(1); }
 }
 
+/* ---------- 5.5 问候语 ---------- */
+.greeting {
+    font-size: 14px;
+    font-weight: 400;
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+    color: rgba(90, 74, 66, 0.7);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: greetingEnter 0.6s ease-out 0.4s both;
+    transition: opacity 0.2s var(--ease-soft);
+}
+
+@keyframes greetingEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ---------- 6. 搜索区域 ---------- */
 .search-box {
     position: relative;
