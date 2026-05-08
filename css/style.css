@@ -154,13 +154,8 @@ body.is-breathing {
     100% { transform: scale(1); }
 }
 
-/* ---------- 5.5 问候语（全局底部氛围水印） ---------- */
+/* ---------- 5.5 问候语（页面最底部） ---------- */
 .greeting {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
     font-size: 11px;
     font-weight: 400;
     font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
@@ -168,8 +163,8 @@ body.is-breathing {
     letter-spacing: 0.1em;
     text-align: center;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+    padding: 24px 0 20px;
     margin: 0;
-    padding: 0;
     opacity: 0;
     animation: greetingEnter 0.8s ease-out 1.0s both;
     transition: opacity 0.2s var(--ease-soft);
@@ -178,11 +173,11 @@ body.is-breathing {
 @keyframes greetingEnter {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(10px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 }
 
