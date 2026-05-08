@@ -157,20 +157,23 @@ body.is-breathing {
 /* ---------- 5.5 问候语（强制视口底部） ---------- */
 .greeting-footer {
     position: fixed;
-    bottom: 28px;
-    left: 0;
-    right: 0;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 9999;
+    width: max-content;
+    max-width: 90%;
     margin: 0;
-    padding: 0;
+    padding: 8px 16px;
     font-size: 12px;
     font-weight: 400;
     font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
     color: #5A4A42;
+    letter-spacing: 0.1em;
     text-align: center;
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px solid red;
     pointer-events: none;
-    opacity: 1;
-    background: rgba(255, 0, 0, 0.05);
 }
 
 /* ---------- 6. 搜索区域 ---------- */
