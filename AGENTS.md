@@ -1,8 +1,8 @@
-<!-- From: D:\experiment1\2\AGENTS.md -->
 # AGENTS.md —— 二次元正太风个人起始页
 
 > 本文件记录项目架构、设计规范与开发决策，供后续会话或开发者快速恢复上下文。
 > 本项目为纯静态前端项目，无构建工具、无框架、无依赖。
+> 文件中的信息基于对实际源码的分析，而非假设或推测。
 
 ---
 
@@ -12,7 +12,7 @@
 
 - **实时时钟**：每秒更新，24 小时制，带冒号呼吸灯与秒脉冲动画。
 - **多搜索引擎切换**：百度、谷歌、必应、DuckDuckGo。
-- **搜索建议**：基于百度搜索建议 JSONP API 的实时补全。
+- **搜索建议**：基于百度搜索建议 JSONP API 的实时补全，150ms 防抖。
 - **书签网格**：可增删改的书签快捷入口，自动探测 favicon，带圆形图标适配与首字母兜底。
 - **时间问候语**：根据当前时段显示不同文案，固定于视口底部。
 - **背景氛围层**：呼吸式渐变光斑 + 50 个漂浮微粒（四角星、泡泡、十字星）。
@@ -27,22 +27,23 @@
 
 ```
 D:\experiment1\2\
-├── index.html              # 页面骨架（加载 css/style.css + 5 个 JS 模块）
+├── index.html              # 主页面入口（加载 css/style.css + 5 个 JS 模块）
 ├── main.js                 # 【遗留文件，已不被 index.html 引用】简易时钟逻辑
 ├── css/
 │   └── style.css           # 全局样式、设计令牌、正太风视觉系统、书签/弹窗/氛围层样式
 ├── js/
-│   ├── clock.js            # 时钟模块：24h 制、冒号呼吸灯、秒脉冲（由 index.html 加载）
+│   ├── clock.js            # 时钟模块：24h 制、冒号呼吸灯、秒脉冲
 │   ├── search.js           # 搜索引擎切换 + 百度搜索建议(JSONP) + 本地存储
 │   ├── ambience.js         # 背景漂浮微粒系统（50 粒子、8 方向、正弦波摆动）
 │   ├── bookmark-manager.js # 书签网格 CRUD、favicon 自动探测、弹窗编辑
 │   └── greeting.js         # 时间问候语（5 个时段规则、每小时刷新）
 ├── startpage/              # 【独立子目录】旧版/精简版起始页（供单独部署）
-│   ├── index.html          # 使用 main.js + js/search.js + js/ambience.js，无书签管理器
+│   ├── index.html          # 使用 main.js + js/search.js + js/ambience.js，无书签管理器与问候语
 │   ├── main.js             # 旧版简易时钟
-│   ├── css/style.css
-│   └── js/search.js
-│   └── js/ambience.js
+│   ├── css/style.css       # 旧版样式（与根目录 css/style.css 不同源）
+│   ├── js/search.js        # 与根目录 js/search.js 内容相同
+│   └── js/ambience.js      # 精简版微粒系统（20 粒子，透明度更低）
+├── .gitignore              # 忽略 node_modules/、startpage/、.claude/、系统文件等
 ├── AGENTS.md               # 本文件
 └── CLAUDE.md               # Claude Code 专用快速参考
 ```
@@ -73,7 +74,7 @@ D:\experiment1\2\
 | `--surface-hover` | `rgba(255,255,255,0.75)` | 表面悬停提亮 |
 | `--border-light` | `rgba(255,255,255,0.85)` | 极淡白光边框/内阴影 |
 
-**背景渐变（body）：**
+**背景渐变（body 与 `.ambient-base`）：**
 ```css
 background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 ```
@@ -137,18 +138,19 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 - 读取失败时静默回退到默认值
 
 **交互细节：**
-- 引擎按钮位于搜索栏内部左侧，与输入框共用 `.search-field` 外框
-- 点击按钮展开/收起下拉浮层；点击外部自动关闭
-- 下拉浮层使用 `transform-origin: top left`，展开动画为 `opacity + translateY(-8px) + scale(0.98) → 正常`
-- 当前选中项左侧显示暖杏色小圆点（`.engine-dot`）
-- 切换引擎时，搜索框 `placeholder` 先淡出（`.is-switching`，150ms）再更换文字并淡入
-- 回车搜索、上下键选择建议、ESC 关闭建议框等逻辑与引擎切换共存
+- 引擎按钮位于搜索栏内部左侧，与输入框共用 `.search-field` 外框。
+- 点击按钮展开/收起下拉浮层；点击外部自动关闭。
+- 下拉浮层使用 `transform-origin: top left`，展开动画为 `opacity + translateY(-8px) + scale(0.98) → 正常`。
+- 当前选中项左侧显示暖杏色小圆点（`.engine-dot`）。
+- 切换引擎时，搜索框 `placeholder` 先淡出（`.is-switching`，150ms）再更换文字并淡入。
+- 回车搜索、上下键选择建议、ESC 关闭建议框等逻辑与引擎切换共存。
 
 **搜索建议：**
 - 使用百度搜索建议 JSONP API：`https://suggestion.baidu.com/su?wd={kw}&cb={callback}`
 - 防抖 150ms
 - 建议下拉框样式与引擎下拉框独立，圆角 20px
 - 悬停/键盘选中背景为 `--accent-soft`
+- 每次请求生成唯一回调名 `baiduSuggestionCallback_{timestamp}`，成功或失败后清理临时 `script` 标签与全局回调函数。
 
 ### 4.3 背景氛围层模块（js/ambience.js）
 
@@ -160,6 +162,8 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 - 使用 `requestAnimationFrame` 循环，带 `dt` 上限 0.1s 防止切页后跳变。
 - 粒子出界或寿命耗尽时 `reset()`，初始加载时随机散布在屏幕内。
 
+> `startpage/js/ambience.js` 为精简版：20 粒子、尺寸 4~12px、透明度 15%~30%，其余算法相同。
+
 ### 4.4 书签网格管理模块（js/bookmark-manager.js）
 
 - 自包含 IIFE，操作 `#bookmarkGrid`。
@@ -168,39 +172,46 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
   - 优先级 1：`https://www.google.com/s2/favicons?domain={domain}&sz=128`
   - 优先级 2：`https://icons.duckduckgo.com/ip3/{domain}.ico`
   - 加载失败时自动回退到首字母圆形兜底（`.bookmark-initial`）。
-  - B站域名特殊处理：直接走首字母兜底（`isBilibili` 检测）。
+  - B站域名特殊处理：直接走首字母兜底（`isBilibili` 检测正则：`/bilibili|b23\.tv/i`）。
 - **CRUD 操作**：
   - 添加：点击 "+" 号打开弹窗，输入名称与网址，自动探测 favicon 并实时预览。
   - 编辑：悬停书签卡片时显示编辑按钮（铅笔图标），可修改名称与网址。
   - 删除：悬停时显示删除按钮（× 图标），带 `bookmarkRemove` 淡出动画，动画结束后从 DOM 与 localStorage 移除。
 - **弹窗**：动态创建 `.bm-overlay` + `.bm-modal`，支持点击遮罩、ESC、取消按钮关闭。网址输入框防抖 500ms 自动刷新预览。
+- **网格布局**：CSS Grid 固定 4 列（`repeat(4, 1fr)`），内部垂直滚动条隐藏。
 
 ### 4.5 时间问候语模块（js/greeting.js）
 
 - 自包含 IIFE，操作 `#greetingText`。
 - 按小时段返回不同文案（5 段规则，含跨午夜 22:00–04:59）。
 - 每小时自动刷新一次，切换时带 200ms 淡入淡出过渡。
-- 固定定位在视口底部（`position: fixed; bottom: 24px; z-index: 9999`），`pointer-events: none` 不拦截点击。
+- 固定定位在视口底部（`position: fixed; bottom: 60px; z-index: 100;`），`pointer-events: none` 不拦截点击。
 
 ### 4.6 视觉层（css/style.css）
 
 **关键布局约定：**
-- `.container` 使用 `position: absolute + transform: translate(-50%,-50%)` 居中
-- `.search-field` 为 `display: flex` 横排容器：左侧引擎选择器 + 右侧输入框
-- `#search` 本身透明背景、无边框，聚焦效果由 `.search-field:focus-within` 统一控制
+- `body` 使用 `display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;`，配合 `.container` 的 `margin-top: 12vh` 实现顶部偏中的纵向定位。
+- `.container` 为固定尺寸卡片（`width: 640px; height: 360px`），内部使用 flex 纵向三区划分（`layer-clock` 35%、`layer-search` 20%、`layer-bookmark` 剩余）。
+- `.search-field` 为 `display: flex` 横排容器：左侧引擎选择器 + 右侧输入框。
+- `#search` 本身透明背景、无边框，聚焦效果由 `.search-field:focus-within` 统一控制。
 
 **引擎选择器样式要点：**
-- `.engine-current`：`rgba(255,255,255,0.6)` 背景，`12px` 圆角，带内阴影
-- `.engine-dropdown`：`rgba(255,251,245,0.92)` 奶白底色，`backdrop-filter: blur(12px)`，`16px` 圆角
+- `.engine-current`：`rgba(255,255,255,0.6)` 背景，`12px` 圆角，带内阴影。
+- `.engine-dropdown`：`rgba(255,251,245,0.92)` 奶白底色，`backdrop-filter: blur(12px)`，`16px` 圆角。
 
 **书签网格样式要点：**
-- `.bookmark-grid` 使用 CSS Grid，`repeat(auto-fill, minmax(80px, 1fr))`
-- `.bookmark-icon-wrap` 为 64px 圆形毛玻璃容器，悬停时上浮 6px
-- `.bookmark-favicon-wrap` 为 44px 内层圆形遮罩，favicon 使用 `object-fit: cover`
-- 编辑/删除按钮平时 `opacity: 0`，悬停卡片时浮现
+- `.bookmark-grid` 使用 CSS Grid，`repeat(4, 1fr)`。
+- `.bookmark-icon-wrap` 为 64px 圆形毛玻璃容器，悬停时上浮 6px。
+- `.bookmark-favicon-wrap` 为 44px 内层圆形遮罩，favicon 使用 `object-fit: cover`。
+- 编辑/删除按钮平时 `opacity: 0`，悬停卡片时浮现。
 
 **响应式断点：**
-- `@media (max-width: 480px)`：卡片内边距缩小、时钟字号降至 42px、引擎名称隐藏（仅显示图标）
+- `@media (max-width: 480px)`：容器宽度 90%、内边距缩小、时钟字号降至 42px、引擎名称隐藏（仅显示图标）。
+
+**背景氛围层样式要点：**
+- 三层固定全屏元素（`.ambient-base` z-index 0、`.ambient-blobs` z-index 1、`.ambient-particles` z-index 2），`pointer-events: none`。
+- `.ambient-blob--blue`（婴儿蓝）与 `.ambient-blob--pink`（樱花粉）为大半径高斯模糊光斑，分别使用 26s 与 34s 的交替漂移动画。
+- `.ambient-base` 作为保险底色，防止光斑移开后露白。
 
 ---
 
@@ -220,7 +231,7 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 - 手动在浏览器中打开页面，检查时钟是否正常走动、冒号是否有脉冲动画。
 - 测试搜索引擎切换、下拉浮层动画、placeholder 过渡。
 - 测试搜索建议的键盘导航（↑/↓/Enter/Esc）。
-- 测试书签的添加、编辑、删除、空状态、 favicon 加载失败后的首字母兜底。
+- 测试书签的添加、编辑、删除、空状态、favicon 加载失败后的首字母兜底。
 - 测试弹窗的打开、保存、取消、ESC 关闭、遮罩点击关闭。
 - 在浏览器 DevTools 中切换至移动端视口，验证 `@media (max-width: 480px)` 响应式表现。
 - 测试隐私模式/无痕窗口，确保 `localStorage` 被禁用时页面不报错。
@@ -231,7 +242,7 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 
 ### 6.1 CSS
 
-- **设计令牌优先**：所有色值、阴影、圆角、过渡曲线必须引用 `:root` 中的 CSS 自定义属性，禁止在普通选择器中硬编码。
+- **设计令牌优先**：所有色值、阴影、圆角、过渡曲线必须引用 `:root` 中的 CSS 自定义属性，禁止在普通选择器中硬编码色值。
 - **强调色唯一性**：只允许使用 `#FFB7A5` 作为强调色，禁止引入第二种高饱和色。
 - **禁止纯黑/深灰边框：** 所有边框必须使用 `--border-light` 或内阴影模拟层次。
 - **注释结构**：CSS 按功能分区，使用 `/* ---------- N. 区块名 ---------- */` 格式。
@@ -250,6 +261,7 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 - **JSONP 清理**：搜索建议的临时 `script` 标签和全局回调函数必须在成功/失败后清理，防止内存泄漏。
 - **事件委托**：如无必要，优先直接绑定；搜索建议列表项与引擎下拉项在渲染时逐个绑定点击事件（当前实现方式）。
 - **自包含 IIFE**：`js/clock.js`、`js/ambience.js`、`js/bookmark-manager.js`、`js/greeting.js` 均为 IIFE，无 exports，无外部依赖。
+- **混合语法风格**：根目录 JS 模块混用 `var` 与 `const/let`（`js/clock.js`、`js/ambience.js`、`js/bookmark-manager.js`、`js/greeting.js` 以 `var` 为主；`js/search.js` 使用 `const/let`）。新增代码建议保持与所在文件一致的风格。
 
 ### 6.3 HTML
 
@@ -302,6 +314,6 @@ document.body.classList.add('is-breathing');
 
 ## 10. 已知待扩展点（非 bug）
 
-- [ ] 背景呼吸动画默认处于 `paused` 状态，需用户手动或通过 JS 开启
-- [ ] 搜索建议目前仅接入百度 API，切换其他引擎时建议词仍来自百度词库（行为与主流浏览器地址栏一致）
-- [ ] 尚未实现天气模块（用户明确指示不要涉及）
+- [ ] 背景呼吸动画默认处于 `paused` 状态，需用户手动或通过 JS 开启。
+- [ ] 搜索建议目前仅接入百度 API，切换其他引擎时建议词仍来自百度词库（行为与主流浏览器地址栏一致）。
+- [ ] 尚未实现天气模块（用户明确指示不要涉及）。
