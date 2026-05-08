@@ -109,12 +109,49 @@ body.is-breathing {
 
 /* ---------- 5. 时钟 ---------- */
 #clock {
-    font-size: 56px;
-    font-weight: 300;
-    letter-spacing: 2px;
+    font-size: 64px;
+    font-weight: 200;
     color: var(--text-main);
     margin-bottom: 28px;
-    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.6);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 0 rgba(255, 183, 165, 0.12);
+    /* 入场动画 */
+    animation: clockEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes clockEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 冒号呼吸灯 */
+.clock-colon {
+    display: inline-block;
+    animation: colonBreathe 1.8s ease-in-out infinite;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes colonBreathe {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+}
+
+/* 秒脉冲：冒号瞬时缩放 */
+.clock-colon.pulse {
+    animation: colonBreathe 1.8s ease-in-out infinite,
+               colonPulse 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes colonPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
 }
 
 /* ---------- 6. 搜索区域 ---------- */
