@@ -15,3 +15,5 @@ source: claude-code
 2. `git commit -m "简短描述改动"`
 3. `git push`
 不需要每次都问用户，直接执行。
+
+**Status:** ✅ 已确认 — 用户明确要求以后每次修改都自动同步到 GitHub。
