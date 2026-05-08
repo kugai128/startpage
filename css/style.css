@@ -174,7 +174,9 @@ body.is-breathing {
     pointer-events: none;
     opacity: 0;
     animation: greetingFadeIn 0.8s ease-out 1.0s both;
-    transition: opacity 0.2s var(--ease-soft);
+    /* 覆盖 * 通用 transition，防止动画结束后 transform 被重置 */
+    transition: none;
+    -webkit-transition: none;
 }
 
 @keyframes greetingFadeIn {
