@@ -157,37 +157,20 @@ body.is-breathing {
 /* ---------- 5.5 问候语（强制视口底部） ---------- */
 .greeting-footer {
     position: fixed;
-    top: auto;
     bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 9999;
     margin: 0;
     padding: 0;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
     font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
-    color: rgba(90, 74, 66, 0.35);
-    letter-spacing: 0.1em;
+    color: #5A4A42;
     text-align: center;
-    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
     pointer-events: none;
-    opacity: 0;
-    animation: greetingFadeIn 0.8s ease-out 1.0s both;
-    /* 覆盖 * 通用 transition，防止动画结束后 transform 被重置 */
-    transition: none;
-    -webkit-transition: none;
-}
-
-@keyframes greetingFadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
+    opacity: 1;
+    background: rgba(255, 0, 0, 0.05);
 }
 
 /* ---------- 6. 搜索区域 ---------- */
