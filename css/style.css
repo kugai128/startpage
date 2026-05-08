@@ -154,30 +154,37 @@ body.is-breathing {
     100% { transform: scale(1); }
 }
 
-/* ---------- 5.5 问候语（页面最底部） ---------- */
-.greeting {
+/* ---------- 5.5 问候语（强制视口底部） ---------- */
+.greeting-footer {
+    position: fixed;
+    top: auto;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    margin: 0;
+    padding: 0;
     font-size: 11px;
     font-weight: 400;
     font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
     color: rgba(90, 74, 66, 0.35);
     letter-spacing: 0.1em;
     text-align: center;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
-    padding: 24px 0 20px;
-    margin: 0;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
     opacity: 0;
-    animation: greetingEnter 0.8s ease-out 1.0s both;
+    animation: greetingFadeIn 0.8s ease-out 1.0s both;
     transition: opacity 0.2s var(--ease-soft);
 }
 
-@keyframes greetingEnter {
+@keyframes greetingFadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateX(-50%) translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
     }
 }
 

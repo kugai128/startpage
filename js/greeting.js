@@ -26,7 +26,7 @@
     return RULES[0].text;
   }
 
-  var el = document.getElementById('greeting');
+  var el = document.getElementById('greetingText');
   if (!el) return;
 
   // 立即显示
