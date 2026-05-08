@@ -219,23 +219,25 @@ body.is-breathing {
     margin-bottom: 0;
 }
 
+/* === 搜索框聚焦光效 === */
 /* 搜索栏外框（左侧引擎 + 右侧输入） */
 .search-field {
     display: flex;
     align-items: center;
     width: 100%;
     padding: 4px 4px 4px 8px;
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-inner), var(--shadow-float);
-    transition: box-shadow 0.3s var(--ease-soft), background 0.3s var(--ease-soft);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.4s ease-out, background 0.4s ease-out, border-color 0.4s ease-out;
 }
 
 .search-field:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px var(--accent-glow), var(--shadow-hover);
-    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 183, 165, 0.4);
+    box-shadow: 0 0 0 3px rgba(255, 183, 165, 0.2), 0 0 20px rgba(255, 183, 165, 0.15);
+    background: rgba(255, 255, 255, 0.75);
+    transition: box-shadow 0.3s ease-out, background 0.3s ease-out, border-color 0.3s ease-out;
 }
 
 /* 输入框 */
@@ -256,11 +258,14 @@ body.is-breathing {
 
 #search::placeholder {
     color: var(--text-placeholder);
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
 }
 
 /* placeholder 切换时的淡出状态 */
-#search.is-switching {
-    opacity: 0.35;
+#search.is-switching::placeholder {
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
 }
 
 /* ---------- 6.1 搜索引擎选择器 ---------- */
