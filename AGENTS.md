@@ -10,10 +10,12 @@
 
 一个单页个人浏览器起始页，气质定位为「晨光薄纱 · 棉花糖融化 · 奶白温润」的二次元正太风。核心功能包括：
 
-- **实时时钟**：每秒更新，24 小时制（`zh-CN` 本地化）。
+- **实时时钟**：每秒更新，24 小时制，带冒号呼吸灯与秒脉冲动画。
 - **多搜索引擎切换**：百度、谷歌、必应、DuckDuckGo。
 - **搜索建议**：基于百度搜索建议 JSONP API 的实时补全。
-- **快捷链接**：B站、GitHub（硬编码于 `index.html`）。
+- **书签网格**：可增删改的书签快捷入口，自动探测 favicon，带圆形图标适配与首字母兜底。
+- **时间问候语**：根据当前时段显示不同文案，固定于视口底部。
+- **背景氛围层**：呼吸式渐变光斑 + 50 个漂浮微粒（四角星、泡泡、十字星）。
 
 **技术栈：** 纯原生 HTML / CSS / JavaScript，无框架，无构建工具，无包管理器，零外部依赖。
 
@@ -25,17 +27,30 @@
 
 ```
 D:\experiment1\2\
-├── index.html          # 页面骨架，引入 css/style.css、main.js、js/search.js
-├── main.js             # 仅保留时钟逻辑（与时钟模块解耦，避免污染）
+├── index.html              # 页面骨架（加载 css/style.css + 5 个 JS 模块）
+├── main.js                 # 【遗留文件，已不被 index.html 引用】简易时钟逻辑
 ├── css/
-│   └── style.css       # 全局样式、设计令牌、正太风视觉系统
+│   └── style.css           # 全局样式、设计令牌、正太风视觉系统、书签/弹窗/氛围层样式
 ├── js/
-│   └── search.js       # 搜索引擎切换 + 百度搜索建议(JSONP) + 本地存储
-├── AGENTS.md           # 本文件
-└── CLAUDE.md           # Claude Code 专用快速参考
+│   ├── clock.js            # 时钟模块：24h 制、冒号呼吸灯、秒脉冲（由 index.html 加载）
+│   ├── search.js           # 搜索引擎切换 + 百度搜索建议(JSONP) + 本地存储
+│   ├── ambience.js         # 背景漂浮微粒系统（50 粒子、8 方向、正弦波摆动）
+│   ├── bookmark-manager.js # 书签网格 CRUD、favicon 自动探测、弹窗编辑
+│   └── greeting.js         # 时间问候语（5 个时段规则、每小时刷新）
+├── startpage/              # 【独立子目录】旧版/精简版起始页（供单独部署）
+│   ├── index.html          # 使用 main.js + js/search.js + js/ambience.js，无书签管理器
+│   ├── main.js             # 旧版简易时钟
+│   ├── css/style.css
+│   └── js/search.js
+│   └── js/ambience.js
+├── AGENTS.md               # 本文件
+└── CLAUDE.md               # Claude Code 专用快速参考
 ```
 
-> **历史清理：** 根目录下曾存在 `style.css`（已移至 `css/style.css`）和包含搜索逻辑的 `main.js`（已拆分）。请勿在根目录重建旧版样式文件。
+> **历史清理注意：**
+> - 根目录 `main.js` 与 `startpage/main.js` 均为遗留简易时钟，当前主入口 `index.html` 已改用 `js/clock.js`。
+> - `startpage/` 子目录在 `.gitignore` 中列出，但物理上存在，作为不含书签管理器的轻量版本独立维护。
+> - 旧版根目录 `style.css` 已移至 `css/style.css`。请勿在根目录重建旧版样式文件。
 
 ---
 
@@ -82,8 +97,8 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 |---|---|---|
 | `--radius-card` | `24px` | 主容器卡片 |
 | `--radius-pill` | `9999px` | 搜索栏、按钮（胶囊形） |
-| `12px` | — | 引擎当前按钮、下拉项 |
-| `16px` | — | 引擎下拉浮层 |
+| `12px` | — | 引擎当前按钮、下拉项、建议首末项 |
+| `16px` | — | 引擎下拉浮层、弹窗输入框 |
 | `20px` | — | 搜索建议下拉框 |
 
 ### 3.4 过渡曲线
@@ -97,13 +112,13 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 
 ## 4. 模块详解
 
-### 4.1 时钟模块（main.js）
+### 4.1 时钟模块（js/clock.js）
 
-- 仅包含 `updateClock()` + `setInterval`
-- 使用 `toLocaleTimeString('zh-CN', { hour12: false })`
-- 页面加载立即执行一次，避免显示 `00:00:00`
-
-**约束：** 时钟逻辑独立在 `main.js`，**禁止**将搜索逻辑写回此文件。
+- 自包含 IIFE，页面加载即执行。
+- 使用 `pad()` 手动格式化 `HH:mm:ss`，而非 `toLocaleTimeString`，以便拆分出可独立控制动画的 `<span class="clock-colon">`。
+- **冒号呼吸灯**：`.clock-colon` 默认播放 `colonBreathe` 1.8s 循环。
+- **秒脉冲**：每秒检测到秒数变化时，给两个冒号添加 `.pulse` 类触发一次 `colonPulse` 缩放动画；通过移除→强制 reflow→重新添加的方式保证动画可重播。
+- 时钟数字使用 `font-variant-numeric: tabular-nums` 防止跳动。
 
 ### 4.2 搜索引擎切换模块（js/search.js）
 
@@ -135,7 +150,39 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 - 建议下拉框样式与引擎下拉框独立，圆角 20px
 - 悬停/键盘选中背景为 `--accent-soft`
 
-### 4.3 视觉层（css/style.css）
+### 4.3 背景氛围层模块（js/ambience.js）
+
+- 自包含 IIFE，操作 `#ambientParticles` 容器。
+- 生成 50 个 SVG 微粒（`PARTICLE_COUNT` 建议保持 40~60）。
+- 三种形状：四角星 `star4`、泡泡 `bubble`、十字星 `cross`，每种有独立的透明度池与颜色池（含暖杏色混入）。
+- 8 个运动方向（四边 + 四角对角线），速度按真实穿越距离计算，确保 30~60 秒完成一次穿越。
+- 垂直于运动方向的正弦波摆动（`sineAmp`、`sineFreq`、`sinePhase`）。
+- 使用 `requestAnimationFrame` 循环，带 `dt` 上限 0.1s 防止切页后跳变。
+- 粒子出界或寿命耗尽时 `reset()`，初始加载时随机散布在屏幕内。
+
+### 4.4 书签网格管理模块（js/bookmark-manager.js）
+
+- 自包含 IIFE，操作 `#bookmarkGrid`。
+- **数据持久化**：`localStorage` 键名 `bookmarks`，首次访问无数据时自动写入 4 个预设（B站、Google、ChatGPT、GitHub）。
+- **favicon 探测**：
+  - 优先级 1：`https://www.google.com/s2/favicons?domain={domain}&sz=128`
+  - 优先级 2：`https://icons.duckduckgo.com/ip3/{domain}.ico`
+  - 加载失败时自动回退到首字母圆形兜底（`.bookmark-initial`）。
+  - B站域名特殊处理：直接走首字母兜底（`isBilibili` 检测）。
+- **CRUD 操作**：
+  - 添加：点击 "+" 号打开弹窗，输入名称与网址，自动探测 favicon 并实时预览。
+  - 编辑：悬停书签卡片时显示编辑按钮（铅笔图标），可修改名称与网址。
+  - 删除：悬停时显示删除按钮（× 图标），带 `bookmarkRemove` 淡出动画，动画结束后从 DOM 与 localStorage 移除。
+- **弹窗**：动态创建 `.bm-overlay` + `.bm-modal`，支持点击遮罩、ESC、取消按钮关闭。网址输入框防抖 500ms 自动刷新预览。
+
+### 4.5 时间问候语模块（js/greeting.js）
+
+- 自包含 IIFE，操作 `#greetingText`。
+- 按小时段返回不同文案（5 段规则，含跨午夜 22:00–04:59）。
+- 每小时自动刷新一次，切换时带 200ms 淡入淡出过渡。
+- 固定定位在视口底部（`position: fixed; bottom: 24px; z-index: 9999`），`pointer-events: none` 不拦截点击。
+
+### 4.6 视觉层（css/style.css）
 
 **关键布局约定：**
 - `.container` 使用 `position: absolute + transform: translate(-50%,-50%)` 居中
@@ -145,6 +192,12 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 **引擎选择器样式要点：**
 - `.engine-current`：`rgba(255,255,255,0.6)` 背景，`12px` 圆角，带内阴影
 - `.engine-dropdown`：`rgba(255,251,245,0.92)` 奶白底色，`backdrop-filter: blur(12px)`，`16px` 圆角
+
+**书签网格样式要点：**
+- `.bookmark-grid` 使用 CSS Grid，`repeat(auto-fill, minmax(80px, 1fr))`
+- `.bookmark-icon-wrap` 为 64px 圆形毛玻璃容器，悬停时上浮 6px
+- `.bookmark-favicon-wrap` 为 44px 内层圆形遮罩，favicon 使用 `object-fit: cover`
+- 编辑/删除按钮平时 `opacity: 0`，悬停卡片时浮现
 
 **响应式断点：**
 - `@media (max-width: 480px)`：卡片内边距缩小、时钟字号降至 42px、引擎名称隐藏（仅显示图标）
@@ -164,9 +217,11 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 本项目**无自动化测试套件**，无 linter，无格式化工具配置。
 
 验证方式：
-- 手动在浏览器中打开页面，检查时钟是否正常走动。
+- 手动在浏览器中打开页面，检查时钟是否正常走动、冒号是否有脉冲动画。
 - 测试搜索引擎切换、下拉浮层动画、placeholder 过渡。
 - 测试搜索建议的键盘导航（↑/↓/Enter/Esc）。
+- 测试书签的添加、编辑、删除、空状态、 favicon 加载失败后的首字母兜底。
+- 测试弹窗的打开、保存、取消、ESC 关闭、遮罩点击关闭。
 - 在浏览器 DevTools 中切换至移动端视口，验证 `@media (max-width: 480px)` 响应式表现。
 - 测试隐私模式/无痕窗口，确保 `localStorage` 被禁用时页面不报错。
 
@@ -183,15 +238,23 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 
 ### 6.2 JavaScript
 
-- **分文件管理**：搜索相关逻辑必须写在 `js/search.js`，样式写在 `css/style.css`，时钟逻辑在 `main.js`。不要往 `main.js` 或根目录旧文件中追加功能。
+- **分文件管理**：
+  - 时钟逻辑在 `js/clock.js`
+  - 搜索逻辑在 `js/search.js`
+  - 氛围层在 `js/ambience.js`
+  - 书签管理在 `js/bookmark-manager.js`
+  - 问候语在 `js/greeting.js`
+  - 样式写在 `css/style.css`
+  - 不要往 `main.js` 或根目录旧文件中追加功能。
 - **localStorage 容错**：读写 `localStorage` 必须包在 `try...catch` 中，避免隐私模式报错。
 - **JSONP 清理**：搜索建议的临时 `script` 标签和全局回调函数必须在成功/失败后清理，防止内存泄漏。
-- **事件委托**：如无必要，优先直接绑定；搜索建议列表项在渲染时逐个绑定点击事件（当前实现方式）。
+- **事件委托**：如无必要，优先直接绑定；搜索建议列表项与引擎下拉项在渲染时逐个绑定点击事件（当前实现方式）。
+- **自包含 IIFE**：`js/clock.js`、`js/ambience.js`、`js/bookmark-manager.js`、`js/greeting.js` 均为 IIFE，无 exports，无外部依赖。
 
 ### 6.3 HTML
 
 - 语义化标签与 ARIA 属性：引擎选择器使用 `aria-haspopup`、`aria-expanded`、`aria-label`、`role="listbox"`、`role="option"` 等。
-- 脚本放在 `</body>` 前，按 `main.js` → `js/search.js` 顺序加载。
+- 脚本放在 `</body>` 前，按 `js/clock.js` → `js/search.js` → `js/ambience.js` → `js/bookmark-manager.js` → `js/greeting.js` 顺序加载。
 
 ---
 
@@ -199,10 +262,13 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 
 1. **强调色唯一性：** 只允许使用 `#FFB7A5` 作为强调色，禁止引入第二种高饱和色。
 2. **禁止纯黑/深灰边框：** 所有边框必须使用 `--border-light` 或内阴影模拟层次。
-3. **分文件管理：** 搜索相关逻辑必须写在 `js/search.js`，样式写在 `css/style.css`。不要往 `main.js` 或根目录旧文件中追加功能。
+3. **分文件管理：** 各模块逻辑必须写在对应 `js/` 文件中。不要往 `main.js` 或根目录旧文件中追加功能。
 4. **localStorage 容错：** 读写 `localStorage` 必须包在 `try...catch` 中，避免隐私模式报错。
 5. **搜索引擎配置扩展：** 如需新增引擎，只需在 `js/search.js` 顶部 `engines` 数组中追加对象，无需改动 DOM 结构。
 6. **JSONP 清理：** 搜索建议的临时 `script` 标签和全局回调函数必须在成功/失败后清理，防止内存泄漏。
+7. **遗留文件勿删：** `main.js`（根目录与 `startpage/` 下）为历史遗留，当前主入口已改用 `js/clock.js`，但 `startpage/` 仍依赖其内部的 `main.js`，删除前需确认影响范围。
+8. **`*` transition 陷阱：** `css/style.css` 中有全局 `* { transition: ... }`，会给所有元素加上 `transform` 过渡。副作用：CSS 动画结束后 `transform` 被覆盖；`position: fixed` 元素的 `translateX(-50%)` 居中可能丢失。如需动画或 fixed 定位，必须显式加 `transition: none` 覆盖。
+9. **脚本执行顺序：** 本项目没有 `DOMContentLoaded` 或 `defer`，所有 JS 都是 IIFE、加载即执行。`<script>` 标签必须放在它所操作的 DOM 元素**之后**，否则 `getElementById` 返回 `null`。
 
 ---
 
@@ -229,6 +295,7 @@ document.body.classList.add('is-breathing');
 
 - 直接双击 `index.html` 在浏览器中打开（个人本地使用）。
 - 上传至任何静态托管服务（GitHub Pages、Vercel、Netlify、Cloudflare Pages、对象存储 CDN 等）。
+- `startpage/` 子目录可作为独立轻量版本单独部署（不含书签管理器与问候语模块）。
 - 无需环境变量、无需服务端运行时、无需数据库。
 
 ---
@@ -238,4 +305,3 @@ document.body.classList.add('is-breathing');
 - [ ] 背景呼吸动画默认处于 `paused` 状态，需用户手动或通过 JS 开启
 - [ ] 搜索建议目前仅接入百度 API，切换其他引擎时建议词仍来自百度词库（行为与主流浏览器地址栏一致）
 - [ ] 尚未实现天气模块（用户明确指示不要涉及）
-- [ ] 尚未实现书签/链接的自定义编辑功能
