@@ -266,26 +266,22 @@
     wrap.setAttribute('aria-label', bm.name);
     wrap.draggable = false;
 
-    /* === favicon 圆形适配：多源 fallback + base64 缓存 + B站首字母兜底 === */
-    if (!isBilibili(bm.url)) {
-      var domain = extractDomain(bm.url);
-      resolveFaviconSources(domain, bm.iconUrl, function (src) {
-        if (src) {
-          var mask = document.createElement('div');
-          mask.className = 'bookmark-favicon-wrap';
-          var img = document.createElement('img');
-          img.className = 'bookmark-favicon';
-          img.src = src;
-          img.alt = '';
-          mask.appendChild(img);
-          wrap.appendChild(mask);
-        } else {
-          showInitial(wrap, bm.name);
-        }
-      });
-    } else {
-      showInitial(wrap, bm.name);
-    }
+    /* === favicon 圆形适配：多源 fallback + base64 缓存 === */
+    var domain = extractDomain(bm.url);
+    resolveFaviconSources(domain, bm.iconUrl, function (src) {
+      if (src) {
+        var mask = document.createElement('div');
+        mask.className = 'bookmark-favicon-wrap';
+        var img = document.createElement('img');
+        img.className = 'bookmark-favicon';
+        img.src = src;
+        img.alt = '';
+        mask.appendChild(img);
+        wrap.appendChild(mask);
+      } else {
+        showInitial(wrap, bm.name);
+      }
+    });
 
     // 编辑按钮
     var editBtn = document.createElement('button');
@@ -534,7 +530,7 @@
     // 设置预览
     var preview = document.getElementById('bmPreview');
     preview.innerHTML = '';
-    if (bm && bm.url && !isBilibili(bm.url)) {
+    if (bm && bm.url) {
       var domain = extractDomain(bm.url);
       resolveFaviconSources(domain, bm.iconUrl, function (src) {
         if (src) {
