@@ -6,10 +6,16 @@
   var STORAGE_KEY = 'bookmarks';
 
   var PRESETS = [
-    { id: 'p1', name: 'B站', url: 'https://bilibili.com', iconUrl: 'https://www.google.com/s2/favicons?domain=bilibili.com&sz=128' },
-    { id: 'p2', name: 'Google', url: 'https://google.com', iconUrl: 'https://www.google.com/s2/favicons?domain=google.com&sz=128' },
-    { id: 'p3', name: 'ChatGPT', url: 'https://chat.openai.com', iconUrl: 'https://www.google.com/s2/favicons?domain=chat.openai.com&sz=128' },
-    { id: 'p4', name: 'GitHub', url: 'https://github.com', iconUrl: 'https://www.google.com/s2/favicons?domain=github.com&sz=128' }
+    { id: 'p1', name: 'B站', url: 'https://www.bilibili.com', iconUrl: 'https://www.google.com/s2/favicons?domain=bilibili.com&sz=128' },
+    { id: 'p2', name: '微博', url: 'https://weibo.com', iconUrl: 'https://www.google.com/s2/favicons?domain=weibo.com&sz=128' },
+    { id: 'p3', name: '抖音', url: 'https://www.douyin.com', iconUrl: 'https://www.google.com/s2/favicons?domain=douyin.com&sz=128' },
+    { id: 'p4', name: '知乎', url: 'https://www.zhihu.com', iconUrl: 'https://www.google.com/s2/favicons?domain=zhihu.com&sz=128' },
+    { id: 'p5', name: '淘宝', url: 'https://www.taobao.com', iconUrl: 'https://www.google.com/s2/favicons?domain=taobao.com&sz=128' },
+    { id: 'p6', name: '京东', url: 'https://www.jd.com', iconUrl: 'https://www.google.com/s2/favicons?domain=jd.com&sz=128' },
+    { id: 'p7', name: 'GitHub', url: 'https://github.com', iconUrl: 'https://www.google.com/s2/favicons?domain=github.com&sz=128' },
+    { id: 'p8', name: 'Google', url: 'https://www.google.com', iconUrl: 'https://www.google.com/s2/favicons?domain=google.com&sz=128' },
+    { id: 'p9', name: 'Bing', url: 'https://www.bing.com', iconUrl: 'https://www.google.com/s2/favicons?domain=bing.com&sz=128' },
+    { id: 'p10', name: '豆瓣', url: 'https://www.douban.com', iconUrl: 'https://www.google.com/s2/favicons?domain=douban.com&sz=128' }
   ];
 
   var FALLBACK_SOURCES = [
