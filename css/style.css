@@ -634,10 +634,10 @@ body.is-breathing {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1.5px dashed rgba(90, 74, 66, 0.15);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -647,7 +647,6 @@ body.is-breathing {
     cursor: pointer;
     line-height: 1;
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                border-color 0.3s var(--ease-soft),
                 background 0.3s var(--ease-soft),
                 color 0.3s var(--ease-soft);
 }
@@ -659,8 +658,6 @@ body.is-breathing {
 
 .bookmark-add-btn:hover {
     transform: translateY(-6px);
-    border-color: rgba(255, 183, 165, 0.5);
-    border-style: solid;
     background: rgba(255, 183, 165, 0.12);
 }
 
