@@ -17,6 +17,24 @@
     function (domain) { return 'https://icons.duckduckgo.com/ip3/' + domain + '.ico'; }
   ];
 
+  var siteNameMap = {
+    'github.com': 'GitHub',
+    'bilibili.com': 'B站',
+    'google.com': 'Google',
+    'youtube.com': 'YouTube',
+    'zhihu.com': '知乎',
+    'baidu.com': '百度',
+    'bing.com': 'Bing',
+    'douban.com': '豆瓣',
+    'taobao.com': '淘宝',
+    'jd.com': '京东',
+    'weibo.com': '微博',
+    'x.com': 'X',
+    'twitter.com': 'Twitter',
+    'reddit.com': 'Reddit',
+    'stackoverflow.com': 'StackOverflow'
+  };
+
   var grid = document.getElementById('bookmarkGrid');
   var modal = null;
   var editingId = null;
@@ -25,6 +43,22 @@
 
   function genId() {
     return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function extractDomain(url) {
+    try {
+      var u = new URL(url);
+      var hostname = u.hostname;
+      if (hostname.indexOf('www.') === 0) hostname = hostname.slice(4);
+      return hostname;
+    } catch (e) {
+      var s = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+      var slash = s.indexOf('/');
+      if (slash !== -1) s = s.slice(0, slash);
+      var colon = s.indexOf(':');
+      if (colon !== -1) s = s.slice(0, colon);
+      return s;
+    }
   }
 
   function getDomain(url) {
@@ -255,6 +289,15 @@
       previewTimer = setTimeout(function () {
         updatePreview(urlInput.value.trim());
       }, 500);
+    });
+
+    // 网址失焦 → 自动填充名称
+    urlInput.addEventListener('blur', function () {
+      var nameInput = document.getElementById('bmName');
+      if (nameInput.value.trim()) return;
+      var domain = extractDomain(urlInput.value.trim());
+      if (!domain) return;
+      nameInput.value = siteNameMap[domain] || (domain.charAt(0).toUpperCase() + domain.slice(1));
     });
 
     // 预览区点击刷新
