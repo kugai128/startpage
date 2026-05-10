@@ -19,10 +19,17 @@
   }
 
   function updateButtonIcon(theme) {
+    // 兼容旧的外部按钮（如果存在）
     var btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-    btn.setAttribute('aria-label', theme === 'dark' ? '切换到浅色模式' : '切换到深色模式');
+    if (btn) {
+      btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', theme === 'dark' ? '切换到浅色模式' : '切换到深色模式');
+    }
+    // 更新设置面板内的按钮
+    var panelBtn = document.getElementById('panelThemeToggle');
+    if (panelBtn) {
+      panelBtn.textContent = theme === 'dark' ? '☀️ 深色模式' : '🌙 浅色模式';
+    }
   }
 
   function initTheme() {
