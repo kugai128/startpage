@@ -18,10 +18,81 @@
     { id: 'p10', name: '豆瓣', url: 'https://www.douban.com', iconUrl: 'https://www.google.com/s2/favicons?domain=douban.com&sz=128' }
   ];
 
-  var FALLBACK_SOURCES = [
+  var FAVICON_SOURCES = [
+    function (domain) { return 'https://api.faviconkit.com/' + domain + '/64'; },
+    function (domain) { return 'https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://' + domain + '&size=64'; },
     function (domain) { return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'; },
     function (domain) { return 'https://icons.duckduckgo.com/ip3/' + domain + '.ico'; }
   ];
+
+  var FAVICON_CACHE_PREFIX = 'favicon_cache_';
+  var MAX_CACHE_ENTRIES = 50;
+  var MAX_CACHE_SIZE = 10 * 1024; // 10KB
+  var CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7天
+
+  function getCachedFavicon(domain) {
+    try {
+      var key = FAVICON_CACHE_PREFIX + domain;
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var item = JSON.parse(raw);
+      if (item.expires && Date.now() > item.expires) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      return item.data;
+    } catch (e) { return null; }
+  }
+
+  function setCachedFavicon(domain, base64) {
+    try {
+      if (!base64 || base64.length > MAX_CACHE_SIZE) return;
+      var keys = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(FAVICON_CACHE_PREFIX) === 0) keys.push(k);
+      }
+      if (keys.length >= MAX_CACHE_ENTRIES) {
+        localStorage.removeItem(keys[0]);
+      }
+      var item = { data: base64, expires: Date.now() + CACHE_TTL };
+      localStorage.setItem(FAVICON_CACHE_PREFIX + domain, JSON.stringify(item));
+    } catch (e) { /* ignore */ }
+  }
+
+  function imgToBase64(img, cb) {
+    try {
+      var canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 64, 64);
+      cb(canvas.toDataURL('image/png'));
+    } catch (e) { cb(''); }
+  }
+
+  function resolveFaviconSources(domain, preferredSrc, cb) {
+    var cached = getCachedFavicon(domain);
+    if (cached) { cb(cached); return; }
+    var sources = [];
+    if (preferredSrc) sources.push(preferredSrc);
+    FAVICON_SOURCES.forEach(function (fn) { sources.push(fn(domain)); });
+    function tryOne(idx) {
+      if (idx >= sources.length) { cb(''); return; }
+      var src = sources[idx];
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () {
+        imgToBase64(img, function (base64) {
+          if (base64) setCachedFavicon(domain, base64);
+        });
+        cb(src);
+      };
+      img.onerror = function () { tryOne(idx + 1); };
+      img.src = src;
+    }
+    tryOne(0);
+  }
 
   var siteNameMap = {
     'github.com': 'GitHub',
@@ -108,23 +179,6 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { /* ignore */ }
   }
 
-  // ---------- favicon 探测 ----------
-
-  function probeFavicon(domain, idx, cb) {
-    if (!domain || idx >= FALLBACK_SOURCES.length) { cb(''); return; }
-    var src = FALLBACK_SOURCES[idx](domain);
-    var img = new Image();
-    img.onload = function () { cb(src); };
-    img.onerror = function () { probeFavicon(domain, idx + 1, cb); };
-    img.src = src;
-  }
-
-  function autoFavicon(url, cb) {
-    var domain = getDomain(url);
-    if (!domain) { cb(''); return; }
-    probeFavicon(domain, 0, cb);
-  }
-
   // ---------- 渲染 ----------
 
   function render(data, animate) {
@@ -166,19 +220,23 @@
     wrap.href = bm.url;
     wrap.setAttribute('aria-label', bm.name);
 
-    /* === favicon 圆形适配：圆形遮罩 + B站首字母兜底 === */
-    if (bm.iconUrl && !isBilibili(bm.url)) {
-      var mask = document.createElement('div');
-      mask.className = 'bookmark-favicon-wrap';
-      var img = document.createElement('img');
-      img.className = 'bookmark-favicon';
-      img.src = bm.iconUrl;
-      img.alt = '';
-      img.onerror = function () {
-        showInitial(wrap, bm.name);
-      };
-      mask.appendChild(img);
-      wrap.appendChild(mask);
+    /* === favicon 圆形适配：多源 fallback + base64 缓存 + B站首字母兜底 === */
+    if (!isBilibili(bm.url)) {
+      var domain = extractDomain(bm.url);
+      resolveFaviconSources(domain, bm.iconUrl, function (src) {
+        if (src) {
+          var mask = document.createElement('div');
+          mask.className = 'bookmark-favicon-wrap';
+          var img = document.createElement('img');
+          img.className = 'bookmark-favicon';
+          img.src = src;
+          img.alt = '';
+          mask.appendChild(img);
+          wrap.appendChild(mask);
+        } else {
+          showInitial(wrap, bm.name);
+        }
+      });
     } else {
       showInitial(wrap, bm.name);
     }
@@ -430,13 +488,19 @@
     // 设置预览
     var preview = document.getElementById('bmPreview');
     preview.innerHTML = '';
-    if (bm && bm.iconUrl) {
-      var img = document.createElement('img');
-      img.src = bm.iconUrl;
-      img.onerror = function () {
-        preview.innerHTML = '<div class="bookmark-initial">' + (bm.name || '?')[0].toUpperCase() + '</div>';
-      };
-      preview.appendChild(img);
+    if (bm && bm.url && !isBilibili(bm.url)) {
+      var domain = extractDomain(bm.url);
+      resolveFaviconSources(domain, bm.iconUrl, function (src) {
+        if (src) {
+          preview.innerHTML = '';
+          var img = document.createElement('img');
+          img.src = src;
+          img.alt = '';
+          preview.appendChild(img);
+        } else {
+          preview.innerHTML = '<div class="bookmark-initial">' + (bm.name || '?')[0].toUpperCase() + '</div>';
+        }
+      });
     } else {
       preview.innerHTML = '<div class="bookmark-initial">' + (bm ? (bm.name || '?')[0].toUpperCase() : '?') + '</div>';
     }
@@ -463,14 +527,13 @@
       return;
     }
 
-    autoFavicon(url, function (src) {
+    var domain = extractDomain(url);
+    resolveFaviconSources(domain, null, function (src) {
       if (src) {
         preview.innerHTML = '';
         var img = document.createElement('img');
         img.src = src;
-        img.onerror = function () {
-          preview.innerHTML = '<div class="bookmark-initial">' + (nameVal ? nameVal[0].toUpperCase() : '?') + '</div>';
-        };
+        img.alt = '';
         preview.appendChild(img);
       } else {
         preview.innerHTML = '<div class="bookmark-initial">' + (nameVal ? nameVal[0].toUpperCase() : '?') + '</div>';
