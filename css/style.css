@@ -108,16 +108,17 @@ body.is-breathing {
     align-items: center;
     justify-content: center;
     width: 100%;
-    margin-bottom: 40px;
+    margin-bottom: 0;
 }
 
 .layer-bookmark {
     position: relative;
-    width: 100%;
+    width: 640px;
+    margin: 32px auto 0;
     background: rgba(255, 255, 255, 0.6);
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     border: 1px solid rgba(255, 255, 255, 0.75);
-    padding: 16px;
+    padding: 24px 40px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06), 0 1px 0 rgba(0, 0, 0, 0.04);
     overflow: hidden;
 }
@@ -978,6 +979,12 @@ body.is-dragging {
     #search {
         padding: 10px 14px 10px 8px;
         font-size: 15px;
+    }
+
+    .layer-bookmark {
+        width: 100%;
+        padding: 16px 20px;
+        margin-top: 24px;
     }
 
     .bookmark-grid {
