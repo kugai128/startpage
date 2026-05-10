@@ -181,6 +181,11 @@ body,
 
 /* === 深色模式通透感优化 === */
 
+/* 清除底部渐变遮罩，保持纯净边缘 */
+[data-theme="dark"] .layer-bookmark::after {
+    display: none;
+}
+
 /* 1. 托盘通透化 */
 [data-theme="dark"] .layer-bookmark {
     background: var(--surface-modal);
