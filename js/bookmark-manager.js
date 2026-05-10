@@ -123,6 +123,9 @@
   var modal = null;
   var editingId = null;
 
+  // ---------- 拖拽排序状态 ----------
+  var dragState = null;
+
   // ---------- 工具函数 ----------
 
   function genId() {
@@ -205,6 +208,7 @@
 
     var addBtn = createAddBtn();
     grid.appendChild(addBtn);
+    bindDragEvents();
   }
 
   function createCard(bm, animIdx) {
@@ -546,6 +550,266 @@
         preview.innerHTML = '<div class="bookmark-initial">' + (nameVal ? nameVal[0].toUpperCase() : '?') + '</div>';
       }
     });
+  }
+
+  // ---------- 初始化 ----------
+
+  // ---------- 拖拽排序 ----------
+
+  function bindDragEvents() {
+    var cards = grid.querySelectorAll('.bookmark-card');
+    cards.forEach(function (card) {
+      card.addEventListener('mousedown', onPointerDown);
+      card.addEventListener('touchstart', onPointerDown, { passive: false });
+    });
+  }
+
+  function onPointerDown(e) {
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    // 点击编辑/删除按钮时不触发拖拽
+    if (e.target.closest('.bookmark-action')) return;
+
+    var card = e.currentTarget;
+    var clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    var clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+    dragState = {
+      el: card,
+      startX: clientX,
+      startY: clientY,
+      isDragging: false,
+      timer: null,
+      clone: null,
+      indicator: null,
+      targetRef: null,
+      insertBefore: true
+    };
+
+    dragState.timer = setTimeout(function () {
+      if (dragState && dragState.el === card) {
+        startDrag(card, clientX, clientY);
+      }
+    }, 200);
+
+    document.addEventListener('mousemove', onPointerMove);
+    document.addEventListener('mouseup', onPointerUp);
+    document.addEventListener('touchmove', onPointerMove, { passive: false });
+    document.addEventListener('touchend', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!dragState) return;
+    e.preventDefault();
+
+    var clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    var clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+    if (!dragState.isDragging) {
+      var dx = clientX - dragState.startX;
+      var dy = clientY - dragState.startY;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        clearTimeout(dragState.timer);
+        startDrag(dragState.el, clientX, clientY);
+      }
+      return;
+    }
+
+    moveDrag(clientX, clientY);
+  }
+
+  function onPointerUp(e) {
+    if (!dragState) return;
+    clearTimeout(dragState.timer);
+
+    document.removeEventListener('mousemove', onPointerMove);
+    document.removeEventListener('mouseup', onPointerUp);
+    document.removeEventListener('touchmove', onPointerMove);
+    document.removeEventListener('touchend', onPointerUp);
+
+    if (dragState.isDragging) {
+      var clientX, clientY;
+      if (e.type === 'touchend') {
+        var t = e.changedTouches[0];
+        clientX = t ? t.clientX : dragState.startX;
+        clientY = t ? t.clientY : dragState.startY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      var gridRect = grid.getBoundingClientRect();
+      var margin = 80;
+      var outOfBounds = clientX < gridRect.left - margin || clientX > gridRect.right + margin ||
+                        clientY < gridRect.top - margin || clientY > gridRect.bottom + margin;
+      if (outOfBounds) {
+        cancelDrag();
+      } else {
+        endDrag();
+      }
+    } else {
+      dragState = null;
+    }
+  }
+
+  function startDrag(card, clientX, clientY) {
+    dragState.isDragging = true;
+    dragState.el.classList.add('dragging');
+
+    var rect = card.getBoundingClientRect();
+    var clone = card.cloneNode(true);
+    clone.classList.remove('entering', 'removing');
+    clone.style.animation = 'none';
+    clone.classList.add('drag-clone');
+    clone.style.position = 'fixed';
+    clone.style.left = rect.left + 'px';
+    clone.style.top = rect.top + 'px';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    clone.style.margin = '0';
+    clone.style.zIndex = '1000';
+    clone.style.pointerEvents = 'none';
+    document.body.appendChild(clone);
+
+    dragState.clone = clone;
+    dragState.cloneOffsetX = clientX - rect.left;
+    dragState.cloneOffsetY = clientY - rect.top;
+
+    var indicator = document.createElement('div');
+    indicator.className = 'drop-indicator';
+    grid.appendChild(indicator);
+    dragState.indicator = indicator;
+
+    document.body.classList.add('is-dragging');
+    document.addEventListener('click', preventClickOnce, true);
+  }
+
+  function preventClickOnce(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.removeEventListener('click', preventClickOnce, true);
+  }
+
+  function moveDrag(clientX, clientY) {
+    if (!dragState || !dragState.clone) return;
+
+    var clone = dragState.clone;
+    var newLeft = clientX - dragState.cloneOffsetX;
+    var newTop = clientY - dragState.cloneOffsetY;
+    clone.style.left = newLeft + 'px';
+    clone.style.top = newTop + 'px';
+
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.bookmark-card'));
+    cards = cards.filter(function (c) { return c !== dragState.el; });
+
+    if (cards.length === 0) {
+      dragState.targetRef = null;
+      dragState.insertBefore = true;
+      dragState.indicator.style.display = 'none';
+      return;
+    }
+
+    // 用 elementFromPoint 探测鼠标下方的卡片（clone 已设 pointer-events: none）
+    var elBelow = document.elementFromPoint(clientX, clientY);
+    var refCard = null;
+    if (elBelow) {
+      refCard = elBelow.closest('.bookmark-card');
+    }
+    if (!refCard || refCard === dragState.el) {
+      var minDist = Infinity;
+      cards.forEach(function (c) {
+        var r = c.getBoundingClientRect();
+        var cx = r.left + r.width / 2;
+        var cy = r.top + r.height / 2;
+        var d = Math.sqrt(Math.pow(clientX - cx, 2) + Math.pow(clientY - cy, 2));
+        if (d < minDist) {
+          minDist = d;
+          refCard = c;
+        }
+      });
+    }
+
+    var refRect = refCard.getBoundingClientRect();
+    var refCenterX = refRect.left + refRect.width / 2;
+    var insertBefore = clientX < refCenterX;
+
+    dragState.targetRef = refCard;
+    dragState.insertBefore = insertBefore;
+
+    updateIndicator(refCard, insertBefore);
+  }
+
+  function updateIndicator(refCard, before) {
+    var indicator = dragState.indicator;
+    var gridRect = grid.getBoundingClientRect();
+    var cardRect = refCard.getBoundingClientRect();
+
+    var left = before
+      ? (cardRect.left - gridRect.left - 1)
+      : (cardRect.right - gridRect.left + 1);
+    var top = cardRect.top - gridRect.top + (cardRect.height - 40) / 2;
+
+    indicator.style.display = 'block';
+    indicator.style.left = left + 'px';
+    indicator.style.top = top + 'px';
+  }
+
+  function endDrag() {
+    var card = dragState.el;
+    var targetRef = dragState.targetRef;
+    var insertBefore = dragState.insertBefore;
+
+    if (targetRef) {
+      if (insertBefore) {
+        grid.insertBefore(card, targetRef);
+      } else {
+        var next = targetRef.nextElementSibling;
+        if (next && next !== card) {
+          grid.insertBefore(card, next);
+        } else {
+          grid.appendChild(card);
+        }
+      }
+    }
+
+    cleanupDragVisuals();
+    syncOrderToStorage();
+    dragState = null;
+  }
+
+  function cancelDrag() {
+    cleanupDragVisuals();
+    dragState = null;
+  }
+
+  function cleanupDragVisuals() {
+    if (!dragState) return;
+    if (dragState.el) dragState.el.classList.remove('dragging');
+    if (dragState.clone) dragState.clone.remove();
+    if (dragState.indicator) dragState.indicator.remove();
+    document.body.classList.remove('is-dragging');
+    document.removeEventListener('click', preventClickOnce, true);
+  }
+
+  function syncOrderToStorage() {
+    var cards = grid.querySelectorAll('.bookmark-card');
+    var newOrder = [];
+    cards.forEach(function (c) {
+      var id = c.dataset.id;
+      if (id) newOrder.push(id);
+    });
+
+    var data = load() || [];
+    var idMap = {};
+    data.forEach(function (b) { idMap[b.id] = b; });
+
+    var newData = [];
+    newOrder.forEach(function (id) {
+      if (idMap[id]) newData.push(idMap[id]);
+    });
+    data.forEach(function (b) {
+      if (newOrder.indexOf(b.id) === -1) newData.push(b);
+    });
+
+    save(newData);
   }
 
   // ---------- 初始化 ----------

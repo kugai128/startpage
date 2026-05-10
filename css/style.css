@@ -477,6 +477,7 @@ body.is-breathing {
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(158, 142, 134, 0.25) transparent;
+    position: relative;
 }
 
 .bookmark-grid::-webkit-scrollbar {
@@ -709,6 +710,44 @@ body.is-breathing {
 
 .bookmark-card.entering {
     animation: bookmarkEnter 0.4s var(--ease-soft) both;
+}
+
+/* ---------- 6.6 拖拽排序 ---------- */
+
+.bookmark-card.dragging {
+    opacity: 0.6;
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    cursor: grabbing;
+    pointer-events: none;
+}
+
+.drag-clone {
+    opacity: 0.9;
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.drop-indicator {
+    position: absolute;
+    width: 2px;
+    height: 40px;
+    background: rgba(255, 183, 165, 0.6);
+    border-radius: 1px;
+    pointer-events: none;
+    z-index: 50;
+    display: none;
+    transition: left 0.1s ease-out, top 0.1s ease-out;
+}
+
+body.is-dragging {
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* ---------- 弹窗 ---------- */
