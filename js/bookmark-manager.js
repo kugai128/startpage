@@ -291,13 +291,16 @@
       }, 500);
     });
 
-    // 网址失焦 → 自动填充名称
+    // 网址失焦 → 自动填充名称并立即刷新预览
     urlInput.addEventListener('blur', function () {
       var nameInput = document.getElementById('bmName');
-      if (nameInput.value.trim()) return;
-      var domain = extractDomain(urlInput.value.trim());
-      if (!domain) return;
-      nameInput.value = siteNameMap[domain] || (domain.charAt(0).toUpperCase() + domain.slice(1));
+      if (!nameInput.value.trim()) {
+        var domain = extractDomain(urlInput.value.trim());
+        if (domain) {
+          nameInput.value = siteNameMap[domain] || (domain.charAt(0).toUpperCase() + domain.slice(1));
+        }
+      }
+      updatePreview(urlInput.value.trim());
     });
 
     // 预览区点击刷新
@@ -307,18 +310,31 @@
 
     // 提交
     document.getElementById('bmSubmit').addEventListener('click', function () {
-      var name = document.getElementById('bmName').value.trim();
+      var nameInput = document.getElementById('bmName');
       var url = document.getElementById('bmUrl').value.trim();
-      if (!name || !url) return;
+      var name = nameInput.value.trim();
+
+      if (!url) return;
+
+      // 名称为空时自动填充
+      if (!name) {
+        var domain = extractDomain(url);
+        if (domain) {
+          name = siteNameMap[domain] || (domain.charAt(0).toUpperCase() + domain.slice(1));
+          nameInput.value = name;
+        } else {
+          return;
+        }
+      }
 
       var data = load() || [];
       var previewImg = document.getElementById('bmPreview').querySelector('img');
+      var iconUrl = previewImg ? previewImg.src : '';
 
       if (editingId) {
-        var bm = { id: editingId, name: name, url: url, iconUrl: previewImg ? previewImg.src : '' };
+        var bm = { id: editingId, name: name, url: url, iconUrl: iconUrl };
         updateBookmark(data, bm);
       } else {
-        var iconUrl = previewImg ? previewImg.src : '';
         var bm2 = { id: genId(), name: name, url: url, iconUrl: iconUrl };
         addBookmark(data, bm2);
       }
