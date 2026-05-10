@@ -38,9 +38,7 @@ html, body {
     --text-sub: #9E8E86;
     --text-placeholder: #C4B5AD;
 
-    /* 卡片与表面 */
-    --surface: rgba(255, 255, 255, 0.6);
-    --surface-hover: rgba(255, 255, 255, 0.75);
+    /* 边框 */
     --border-light: rgba(255, 255, 255, 0.85);
 
     /* 阴影（极淡弥散） */
@@ -57,13 +55,7 @@ html, body {
     --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 通用过渡 —— 为后续 JS 交互预留 */
-* {
-    transition: background-color 0.3s var(--ease-soft),
-                box-shadow 0.3s var(--ease-soft),
-                transform 0.3s var(--ease-bounce),
-                opacity 0.3s var(--ease-soft);
-}
+/* 通用过渡 —— 仅颜色/阴影/透明度，transform 由各元素显式控制 */
 
 /* ---------- 3. 背景呼吸动画 ---------- */
 @keyframes breathe {

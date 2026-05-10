@@ -197,7 +197,7 @@
   function addBookmark(data, bm) {
     data.push(bm);
     save(data);
-    render(data, false);
+    render(data, true);
   }
 
   function updateBookmark(data, bm) {
