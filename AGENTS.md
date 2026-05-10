@@ -1,21 +1,22 @@
 # AGENTS.md —— 二次元正太风个人起始页
 
-> 本文件记录项目架构、设计规范与开发决策，供后续会话或开发者快速恢复上下文。
-> 本项目为纯静态前端项目，无构建工具、无框架、无依赖。
-> 文件中的信息基于对实际源码的分析，而非假设或推测。
+> **权威文档已迁移至 [PROJECT.md](./PROJECT.md)**，本文件仅保留设计 token 参考与动效接口。
+> 本文件基于 2026-05 状态更新。本项目为纯静态前端项目，无构建工具、无框架、无依赖。
 
 ---
 
 ## 1. 项目概述
 
-一个单页个人浏览器起始页，气质定位为「晨光薄纱 · 棉花糖融化 · 奶白温润」的二次元正太风。核心功能包括：
+一个单页个人浏览器起始页，气质定位为「晨光薄纱 · 棉花糖融化 · 奶白温润」的二次元正太风。**当前布局模仿 Bing/Google 起始页**：内容坐上中部、搜索框为视觉中心、时钟为辅助元素。
 
-- **实时时钟**：每秒更新，24 小时制，带冒号呼吸灯与秒脉冲动画。
+核心功能包括：
+
+- **实时时钟**：52px/weight-300，冒号呼吸灯与秒脉冲动画。
 - **多搜索引擎切换**：百度、谷歌、必应、DuckDuckGo。
-- **搜索建议**：基于百度搜索建议 JSONP API 的实时补全，150ms 防抖。
-- **书签网格**：可增删改的书签快捷入口，自动探测 favicon，带圆形图标适配与首字母兜底。
+- **搜索建议**：基于百度 JSONP API 的实时补全，150ms 防抖。
+- **书签网格**：64px 圆形图标，可增删改，自动探测 favicon，带首字母兜底。
 - **时间问候语**：根据当前时段显示不同文案，固定于视口底部。
-- **背景氛围层**：呼吸式渐变光斑 + 50 个漂浮微粒（四角星、泡泡、十字星）。
+- **背景氛围层**：呼吸式渐变光斑 + 50 个漂浮微粒。
 
 **技术栈：** 纯原生 HTML / CSS / JavaScript，无框架，无构建工具，无包管理器，零外部依赖。
 
@@ -28,30 +29,24 @@
 ```
 D:\experiment1\2\
 ├── index.html              # 主页面入口（加载 css/style.css + 5 个 JS 模块）
-├── main.js                 # 【遗留文件，已不被 index.html 引用】简易时钟逻辑
 ├── css/
-│   └── style.css           # 全局样式、设计令牌、正太风视觉系统、书签/弹窗/氛围层样式
+│   └── style.css           # 全局样式、设计令牌、Bing风格视觉系统（~1015 行）
 ├── js/
-│   ├── clock.js            # 时钟模块：24h 制、冒号呼吸灯、秒脉冲
-│   ├── search.js           # 搜索引擎切换 + 百度搜索建议(JSONP) + 本地存储
+│   ├── clock.js            # 时钟模块：冒号呼吸灯、秒脉冲
+│   ├── search.js           # 搜索引擎切换 + 百度 JSONP 搜索建议 + 本地存储
 │   ├── ambience.js         # 背景漂浮微粒系统（50 粒子、8 方向、正弦波摆动）
 │   ├── bookmark-manager.js # 书签网格 CRUD、favicon 自动探测、弹窗编辑
 │   └── greeting.js         # 时间问候语（5 个时段规则、每小时刷新）
-├── startpage/              # 【独立子目录】旧版/精简版起始页（供单独部署）
-│   ├── index.html          # 使用 main.js + js/search.js + js/ambience.js，无书签管理器与问候语
-│   ├── main.js             # 旧版简易时钟
-│   ├── css/style.css       # 旧版样式（与根目录 css/style.css 不同源）
-│   ├── js/search.js        # 与根目录 js/search.js 内容相同
-│   └── js/ambience.js      # 精简版微粒系统（20 粒子，透明度更低）
-├── .gitignore              # 忽略 node_modules/、startpage/、.claude/、系统文件等
+├── .gitignore              # 忽略 startpage/、node_modules/、.claude/、系统文件等
+├── PROJECT.md              # 【权威】AI 交接文档，替代本文件的架构描述
 ├── AGENTS.md               # 本文件
 └── CLAUDE.md               # Claude Code 专用快速参考
 ```
 
 > **历史清理注意：**
-> - 根目录 `main.js` 与 `startpage/main.js` 均为遗留简易时钟，当前主入口 `index.html` 已改用 `js/clock.js`。
-> - `startpage/` 子目录在 `.gitignore` 中列出，但物理上存在，作为不含书签管理器的轻量版本独立维护。
-> - 旧版根目录 `style.css` 已移至 `css/style.css`。请勿在根目录重建旧版样式文件。
+> - 根目录 `main.js` 已在 `e3cdcd2` 提交中删除。
+> - `startpage/` 子目录在 `.gitignore` 中，物理存在但不被 Git 追踪，为旧版轻量版本。
+> - 详见 **PROJECT.md** 获取完整的当前架构、布局尺寸、陷阱与演进记录。
 
 ---
 
@@ -189,29 +184,27 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 
 ### 4.6 视觉层（css/style.css）
 
-**关键布局约定：**
-- `body` 使用 `display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;`，配合 `.container` 的 `margin-top: 12vh` 实现顶部偏中的纵向定位。
-- `.container` 为固定尺寸卡片（`width: 640px; height: 360px`），内部使用 flex 纵向三区划分（`layer-clock` 35%、`layer-search` 20%、`layer-bookmark` 剩余）。
-- `.search-field` 为 `display: flex` 横排容器：左侧引擎选择器 + 右侧输入框。
-- `#search` 本身透明背景、无边框，聚焦效果由 `.search-field:focus-within` 统一控制。
-
-**引擎选择器样式要点：**
-- `.engine-current`：`rgba(255,255,255,0.6)` 背景，`12px` 圆角，带内阴影。
-- `.engine-dropdown`：`rgba(255,251,245,0.92)` 奶白底色，`backdrop-filter: blur(12px)`，`16px` 圆角。
+**关键布局约定（当前 Bing 风格）：**
+- `body` 使用 `display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;`，内容坐上中部。
+- `.container` 为纯布局容器（无背景、无边框、无阴影），`margin-top: 14vh; max-width: 680px; gap: 0`。
+- 三层间距用 `margin-bottom` 控制：`.layer-clock` 28px、`.layer-search` 40px、`.layer-bookmark` 0。
+- `.search-field` 为 `display: flex`，高度 52px，`border-radius: 26px`，背景 `rgba(255,255,255,0.75)`。
+- 搜索框 `.search-box` 宽度 `min-width: 600px; max-width: 720px`。
+- 聚焦效果由 `.search-field:focus-within` 统一控制（暖杏色光晕）。
 
 **书签网格样式要点：**
-- `.bookmark-grid` 使用 CSS Grid，`repeat(4, 1fr)`。
+- `.bookmark-grid` 使用 `display: flex; flex-wrap: wrap`，`gap: 28px 32px`。
 - `.bookmark-icon-wrap` 为 64px 圆形毛玻璃容器，悬停时上浮 6px。
-- `.bookmark-favicon-wrap` 为 44px 内层圆形遮罩，favicon 使用 `object-fit: cover`。
-- 编辑/删除按钮平时 `opacity: 0`，悬停卡片时浮现。
+- `.bookmark-favicon-wrap` 与 `.bookmark-initial` 为 32px 内层圆形。
+- 编辑/删除按钮（22px）平时 `opacity: 0`，悬停卡片时浮现。
+- `max-height: 140px` + 隐藏滚动条处理溢出。
 
 **响应式断点：**
-- `@media (max-width: 480px)`：容器宽度 90%、内边距缩小、时钟字号降至 42px、引擎名称隐藏（仅显示图标）。
+- `@media (max-width: 480px)`：容器 `margin-top: 10vh`，时钟 40px，图标 48px/28px，网格间距 20px 24px，引擎名称隐藏。
 
-**背景氛围层样式要点：**
+**背景氛围层：**
 - 三层固定全屏元素（`.ambient-base` z-index 0、`.ambient-blobs` z-index 1、`.ambient-particles` z-index 2），`pointer-events: none`。
-- `.ambient-blob--blue`（婴儿蓝）与 `.ambient-blob--pink`（樱花粉）为大半径高斯模糊光斑，分别使用 26s 与 34s 的交替漂移动画。
-- `.ambient-base` 作为保险底色，防止光斑移开后露白。
+- 两个大半径高斯模糊光斑分别使用 26s 与 34s 的交替漂移动画。
 
 ---
 
@@ -274,13 +267,12 @@ background: linear-gradient(135deg, #E8F0F5 0%, #FFFBF5 45%, #FDF2F0 100%);
 
 1. **强调色唯一性：** 只允许使用 `#FFB7A5` 作为强调色，禁止引入第二种高饱和色。
 2. **禁止纯黑/深灰边框：** 所有边框必须使用 `--border-light` 或内阴影模拟层次。
-3. **分文件管理：** 各模块逻辑必须写在对应 `js/` 文件中。不要往 `main.js` 或根目录旧文件中追加功能。
+3. **分文件管理：** 各模块逻辑必须写在对应 `js/` 文件中。
 4. **localStorage 容错：** 读写 `localStorage` 必须包在 `try...catch` 中，避免隐私模式报错。
 5. **搜索引擎配置扩展：** 如需新增引擎，只需在 `js/search.js` 顶部 `engines` 数组中追加对象，无需改动 DOM 结构。
 6. **JSONP 清理：** 搜索建议的临时 `script` 标签和全局回调函数必须在成功/失败后清理，防止内存泄漏。
-7. **遗留文件勿删：** `main.js`（根目录与 `startpage/` 下）为历史遗留，当前主入口已改用 `js/clock.js`，但 `startpage/` 仍依赖其内部的 `main.js`，删除前需确认影响范围。
-8. **`*` transition 陷阱：** `css/style.css` 中有全局 `* { transition: ... }`，会给所有元素加上 `transform` 过渡。副作用：CSS 动画结束后 `transform` 被覆盖；`position: fixed` 元素的 `translateX(-50%)` 居中可能丢失。如需动画或 fixed 定位，必须显式加 `transition: none` 覆盖。
-9. **脚本执行顺序：** 本项目没有 `DOMContentLoaded` 或 `defer`，所有 JS 都是 IIFE、加载即执行。`<script>` 标签必须放在它所操作的 DOM 元素**之后**，否则 `getElementById` 返回 `null`。
+7. **`*` transition 陷阱已修复：** 全局 `* { transition: transform ... }` 已在 `e3cdcd2` 提交中移除，不再与 CSS 动画和 `position: fixed` 居中定位冲突。
+8. **脚本执行顺序：** 本项目没有 `DOMContentLoaded` 或 `defer`，所有 JS 都是 IIFE、加载即执行。`<script>` 标签必须放在它所操作的 DOM 元素**之后**，否则 `getElementById` 返回 `null`。
 
 ---
 
