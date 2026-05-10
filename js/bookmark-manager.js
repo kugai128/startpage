@@ -61,6 +61,16 @@
     }
   }
 
+  var URL_REGEX = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+
+  function normalizeUrl(url) {
+    return url.trim().replace(/\n/g, '');
+  }
+
+  function isValidUrl(url) {
+    return URL_REGEX.test(normalizeUrl(url));
+  }
+
   function getDomain(url) {
     try { return new URL(url).hostname; } catch (e) { return ''; }
   }
@@ -269,6 +279,7 @@
         '</div>' +
         '<input class="bm-field" id="bmName" placeholder="网站名称（可不填）" maxlength="30">' +
         '<input class="bm-field" id="bmUrl" placeholder="网址  https://...">' +
+        '<div class="bm-url-error" id="bmUrlError">请输入正确的网址哦~</div>' +
         '<button class="bm-submit" id="bmSubmit">保存</button>' +
         '<button class="bm-cancel" id="bmCancel">取消</button>' +
       '</div>';
@@ -283,24 +294,48 @@
 
     // 网址输入 → 自动预览
     var urlInput = document.getElementById('bmUrl');
+    var urlError = document.getElementById('bmUrlError');
     var previewTimer = null;
     urlInput.addEventListener('input', function () {
       clearTimeout(previewTimer);
+      // 实时校验
+      var val = normalizeUrl(urlInput.value);
+      if (val && !isValidUrl(val)) {
+        urlInput.classList.add('is-invalid');
+        urlError.classList.add('show');
+      } else {
+        urlInput.classList.remove('is-invalid');
+        urlError.classList.remove('show');
+      }
       previewTimer = setTimeout(function () {
         updatePreview(urlInput.value.trim());
       }, 500);
     });
 
-    // 网址失焦 → 自动填充名称并立即刷新预览
+    // 网址失焦 → 自动补全协议、填充名称并立即刷新预览
     urlInput.addEventListener('blur', function () {
       var nameInput = document.getElementById('bmName');
+      var val = normalizeUrl(urlInput.value);
+      // 自动补全协议
+      if (val && !/^https?:\/\//i.test(val)) {
+        urlInput.value = 'https://' + val;
+        val = urlInput.value;
+      }
       if (!nameInput.value.trim()) {
-        var domain = extractDomain(urlInput.value.trim());
+        var domain = extractDomain(val);
         if (domain) {
           nameInput.value = siteNameMap[domain] || (domain.charAt(0).toUpperCase() + domain.slice(1));
         }
       }
-      updatePreview(urlInput.value.trim());
+      updatePreview(val);
+      // 校验
+      if (val && !isValidUrl(val)) {
+        urlInput.classList.add('is-invalid');
+        urlError.classList.add('show');
+      } else {
+        urlInput.classList.remove('is-invalid');
+        urlError.classList.remove('show');
+      }
     });
 
     // 预览区点击刷新
@@ -311,10 +346,28 @@
     // 提交
     document.getElementById('bmSubmit').addEventListener('click', function () {
       var nameInput = document.getElementById('bmName');
-      var url = document.getElementById('bmUrl').value.trim();
+      var urlInputEl = document.getElementById('bmUrl');
+      var url = normalizeUrl(urlInputEl.value);
       var name = nameInput.value.trim();
 
-      if (!url) return;
+      // 强制前缀 https://
+      if (url && !/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+        urlInputEl.value = url;
+      }
+
+      // 校验阻断
+      if (!url || !isValidUrl(url)) {
+        urlInputEl.classList.add('is-shaking');
+        setTimeout(function () { urlInputEl.classList.remove('is-shaking'); }, 300);
+        urlError.textContent = '这个地址看起来不对呢，检查一下再试试吧~';
+        urlError.classList.add('show');
+        urlInputEl.classList.add('is-invalid');
+        return;
+      }
+
+      urlError.classList.remove('show');
+      urlInputEl.classList.remove('is-invalid');
 
       // 名称为空时自动填充
       if (!name) {

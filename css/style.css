@@ -861,6 +861,36 @@ body.is-breathing {
     color: var(--text-main);
 }
 
+/* ---------- 7.5 网址校验提示 ---------- */
+.bm-url-error {
+    display: none;
+    margin: -10px 0 10px;
+    font-size: 12px;
+    color: rgba(255, 100, 100, 0.8);
+    text-align: center;
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+}
+
+.bm-url-error.show {
+    display: block;
+}
+
+.bm-field.is-invalid {
+    border: 1px solid rgba(255, 100, 100, 0.3);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+}
+
+.bm-field.is-shaking {
+    animation: shake 0.3s ease-in-out;
+}
+
 /* ---------- 8. 弹性悬停动效预留 ---------- */
 @keyframes softPulse {
     0%, 100% { transform: scale(1); }
