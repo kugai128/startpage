@@ -717,21 +717,15 @@ body.is-breathing {
 
 .bookmark-card.dragging {
     opacity: 0.6;
-    transform: scale(1.05);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     z-index: 100;
     cursor: grabbing;
     pointer-events: none;
+    will-change: transform;
 }
 
-.drag-clone {
-    opacity: 0.9;
-    transform: scale(1.05);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-select: none;
+.bookmark-placeholder {
+    visibility: hidden;
 }
 
 .drop-indicator {
@@ -742,8 +736,10 @@ body.is-breathing {
     border-radius: 1px;
     pointer-events: none;
     z-index: 50;
-    display: none;
-    transition: left 0.1s ease-out, top 0.1s ease-out;
+    opacity: 0;
+    left: 0;
+    top: 0;
+    will-change: transform, opacity;
 }
 
 body.is-dragging {

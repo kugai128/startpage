@@ -588,21 +588,17 @@
   // ---------- 拖拽排序 ----------
 
   function bindDragEvents() {
-    var cards = grid.querySelectorAll('.bookmark-card');
-    cards.forEach(function (card) {
-      card.addEventListener('mousedown', onPointerDown);
-      card.addEventListener('touchstart', onPointerDown, { passive: false });
-    });
+    grid.addEventListener('mousedown', onGridPointerDown);
+    grid.addEventListener('touchstart', onGridPointerDown, { passive: false });
   }
 
-  function onPointerDown(e) {
+  function onGridPointerDown(e) {
+    var card = e.target.closest('.bookmark-card');
+    if (!card) return;
     if (e.type === 'mousedown' && e.button !== 0) return;
-    // 点击编辑/删除按钮时不触发拖拽
     if (e.target.closest('.bookmark-action')) return;
-
-    var card = e.currentTarget;
-    // 阻止浏览器把 <a> 链接识别为可拖拽对象（拖到地址栏/桌面）
     if (e.type === 'mousedown') e.preventDefault();
+
     var clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     var clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
 
@@ -612,10 +608,19 @@
       startY: clientY,
       startTime: Date.now(),
       isDragging: false,
-      clone: null,
+      placeholder: null,
       indicator: null,
       targetRef: null,
-      insertBefore: true
+      targetIdx: -1,
+      insertBefore: true,
+      offsetX: 0,
+      offsetY: 0,
+      startRect: null,
+      gridRect: null,
+      cardRects: [],
+      pendingX: 0,
+      pendingY: 0,
+      rafId: null
     };
 
     startDrag(card, clientX, clientY);
@@ -673,10 +678,11 @@
     // 拖拽：阻止后续 click 事件，避免放置后意外跳转
     document.addEventListener('click', preventClickOnce, true);
 
-    var gridRect = grid.getBoundingClientRect();
     var margin = 80;
-    var outOfBounds = clientX < gridRect.left - margin || clientX > gridRect.right + margin ||
-                      clientY < gridRect.top - margin || clientY > gridRect.bottom + margin;
+    var outOfBounds = clientX < dragState.gridRect.left - margin ||
+                      clientX > dragState.gridRect.right + margin ||
+                      clientY < dragState.gridRect.top - margin ||
+                      clientY > dragState.gridRect.bottom + margin;
     if (outOfBounds) {
       cancelDrag();
     } else {
@@ -689,26 +695,56 @@
     dragState.el.classList.add('dragging');
 
     var rect = card.getBoundingClientRect();
-    var clone = card.cloneNode(true);
-    clone.classList.remove('entering', 'removing');
-    clone.style.animation = 'none';
-    clone.classList.add('drag-clone');
-    clone.style.position = 'fixed';
-    clone.style.left = rect.left + 'px';
-    clone.style.top = rect.top + 'px';
-    clone.style.width = rect.width + 'px';
-    clone.style.height = rect.height + 'px';
-    clone.style.margin = '0';
-    clone.style.zIndex = '1000';
-    clone.style.pointerEvents = 'none';
-    document.body.appendChild(clone);
+    dragState.startRect = rect;
+    dragState.gridRect = grid.getBoundingClientRect();
 
-    dragState.clone = clone;
-    dragState.cloneOffsetX = clientX - rect.left;
-    dragState.cloneOffsetY = clientY - rect.top;
+    // 创建占位符，保持网格不塌陷
+    var placeholder = document.createElement('div');
+    placeholder.className = 'bookmark-card bookmark-placeholder';
+    placeholder.style.visibility = 'hidden';
+    grid.insertBefore(placeholder, card);
+    dragState.placeholder = placeholder;
 
+    // 将被拖卡片从 grid 移除，移到 body 下作为独立层
+    card.remove();
+    card.style.position = 'fixed';
+    card.style.left = rect.left + 'px';
+    card.style.top = rect.top + 'px';
+    card.style.width = rect.width + 'px';
+    card.style.height = rect.height + 'px';
+    card.style.margin = '0';
+    card.style.zIndex = '1000';
+    card.style.pointerEvents = 'none';
+    card.style.willChange = 'transform';
+    card.style.transform = 'translate3d(0, 0, 0) scale(1.05)';
+    document.body.appendChild(card);
+
+    dragState.offsetX = clientX - rect.left;
+    dragState.offsetY = clientY - rect.top;
+
+    // 预计算所有书签卡片的中心点与边界（避免拖拽中频繁 getBoundingClientRect）
+    dragState.cardRects = [];
+    var allCards = grid.querySelectorAll('.bookmark-card');
+    allCards.forEach(function (c) {
+      if (c === placeholder) return;
+      var r = c.getBoundingClientRect();
+      dragState.cardRects.push({
+        el: c,
+        left: r.left,
+        right: r.right,
+        top: r.top,
+        bottom: r.bottom,
+        cx: r.left + r.width / 2,
+        cy: r.top + r.height / 2,
+        width: r.width,
+        height: r.height
+      });
+    });
+
+    // 指示线：只创建一次，全程复用，通过 transform 移动
     var indicator = document.createElement('div');
     indicator.className = 'drop-indicator';
+    indicator.style.opacity = '0';
     grid.appendChild(indicator);
     dragState.indicator = indicator;
 
@@ -722,67 +758,60 @@
   }
 
   function moveDrag(clientX, clientY) {
-    if (!dragState || !dragState.clone) return;
+    if (!dragState || !dragState.isDragging) return;
 
-    var clone = dragState.clone;
-    var newLeft = clientX - dragState.cloneOffsetX;
-    var newTop = clientY - dragState.cloneOffsetY;
-    clone.style.left = newLeft + 'px';
-    clone.style.top = newTop + 'px';
+    // 记录待处理坐标，由 RAF 统一更新视觉
+    dragState.pendingX = clientX - dragState.offsetX - dragState.startRect.left;
+    dragState.pendingY = clientY - dragState.offsetY - dragState.startRect.top;
 
-    var cards = Array.prototype.slice.call(grid.querySelectorAll('.bookmark-card'));
-    cards = cards.filter(function (c) { return c !== dragState.el; });
-
-    if (cards.length === 0) {
-      dragState.targetRef = null;
-      dragState.insertBefore = true;
-      dragState.indicator.style.display = 'none';
-      return;
-    }
-
-    // 用 elementFromPoint 探测鼠标下方的卡片（clone 已设 pointer-events: none）
-    var elBelow = document.elementFromPoint(clientX, clientY);
-    var refCard = null;
-    if (elBelow) {
-      refCard = elBelow.closest('.bookmark-card');
-    }
-    if (!refCard || refCard === dragState.el) {
-      var minDist = Infinity;
-      cards.forEach(function (c) {
-        var r = c.getBoundingClientRect();
-        var cx = r.left + r.width / 2;
-        var cy = r.top + r.height / 2;
-        var d = Math.sqrt(Math.pow(clientX - cx, 2) + Math.pow(clientY - cy, 2));
-        if (d < minDist) {
-          minDist = d;
-          refCard = c;
-        }
+    if (dragState.rafId === null) {
+      dragState.rafId = requestAnimationFrame(function () {
+        if (!dragState) return;
+        dragState.el.style.transform = 'translate3d(' + dragState.pendingX + 'px, ' + dragState.pendingY + 'px, 0) scale(1.05)';
+        dragState.rafId = null;
       });
     }
 
-    var refRect = refCard.getBoundingClientRect();
-    var refCenterX = refRect.left + refRect.width / 2;
-    var insertBefore = clientX < refCenterX;
+    // 与预存坐标比对，找到最近插入位置
+    var minDist = Infinity;
+    var nearestIdx = -1;
+    dragState.cardRects.forEach(function (item, idx) {
+      var d = Math.pow(clientX - item.cx, 2) + Math.pow(clientY - item.cy, 2);
+      if (d < minDist) {
+        minDist = d;
+        nearestIdx = idx;
+      }
+    });
 
-    dragState.targetRef = refCard;
-    dragState.insertBefore = insertBefore;
+    if (nearestIdx === -1) {
+      if (dragState.targetIdx !== -1) {
+        dragState.targetIdx = -1;
+        dragState.targetRef = null;
+        dragState.indicator.style.opacity = '0';
+      }
+      return;
+    }
 
-    updateIndicator(refCard, insertBefore);
+    var nearest = dragState.cardRects[nearestIdx];
+    var insertBefore = clientX < nearest.cx;
+
+    if (dragState.targetIdx !== nearestIdx || dragState.insertBefore !== insertBefore) {
+      dragState.targetIdx = nearestIdx;
+      dragState.targetRef = nearest.el;
+      dragState.insertBefore = insertBefore;
+      updateIndicator(nearest, insertBefore);
+    }
   }
 
-  function updateIndicator(refCard, before) {
+  function updateIndicator(nearest, before) {
     var indicator = dragState.indicator;
-    var gridRect = grid.getBoundingClientRect();
-    var cardRect = refCard.getBoundingClientRect();
-
     var left = before
-      ? (cardRect.left - gridRect.left - 1)
-      : (cardRect.right - gridRect.left + 1);
-    var top = cardRect.top - gridRect.top + (cardRect.height - 40) / 2;
+      ? (nearest.left - dragState.gridRect.left - 1)
+      : (nearest.right - dragState.gridRect.left + 1);
+    var top = nearest.top - dragState.gridRect.top + (nearest.height - 40) / 2;
 
-    indicator.style.display = 'block';
-    indicator.style.left = left + 'px';
-    indicator.style.top = top + 'px';
+    indicator.style.opacity = '1';
+    indicator.style.transform = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
   }
 
   function endDrag() {
@@ -790,6 +819,31 @@
     var targetRef = dragState.targetRef;
     var insertBefore = dragState.insertBefore;
 
+    // 取消未执行的 RAF
+    if (dragState.rafId !== null) {
+      cancelAnimationFrame(dragState.rafId);
+      dragState.rafId = null;
+    }
+
+    // 从 body 移除卡片，恢复样式
+    card.remove();
+    card.style.position = '';
+    card.style.left = '';
+    card.style.top = '';
+    card.style.width = '';
+    card.style.height = '';
+    card.style.margin = '';
+    card.style.zIndex = '';
+    card.style.pointerEvents = '';
+    card.style.willChange = '';
+    card.style.transform = '';
+
+    // 移除占位符
+    if (dragState.placeholder) {
+      dragState.placeholder.remove();
+    }
+
+    // 插入到新位置
     if (targetRef) {
       if (insertBefore) {
         grid.insertBefore(card, targetRef);
@@ -801,6 +855,8 @@
           grid.appendChild(card);
         }
       }
+    } else {
+      grid.appendChild(card);
     }
 
     cleanupDragVisuals();
@@ -810,6 +866,34 @@
 
   function cancelDrag() {
     document.removeEventListener('click', preventClickOnce, true);
+
+    var card = dragState.el;
+
+    // 取消未执行的 RAF
+    if (dragState.rafId !== null) {
+      cancelAnimationFrame(dragState.rafId);
+      dragState.rafId = null;
+    }
+
+    // 从 body 移除卡片，恢复样式
+    card.remove();
+    card.style.position = '';
+    card.style.left = '';
+    card.style.top = '';
+    card.style.width = '';
+    card.style.height = '';
+    card.style.margin = '';
+    card.style.zIndex = '';
+    card.style.pointerEvents = '';
+    card.style.willChange = '';
+    card.style.transform = '';
+
+    // 把卡片插回占位符位置
+    if (dragState.placeholder) {
+      grid.insertBefore(card, dragState.placeholder);
+      dragState.placeholder.remove();
+    }
+
     cleanupDragVisuals();
     dragState = null;
   }
@@ -817,7 +901,6 @@
   function cleanupDragVisuals() {
     if (!dragState) return;
     if (dragState.el) dragState.el.classList.remove('dragging');
-    if (dragState.clone) dragState.clone.remove();
     if (dragState.indicator) dragState.indicator.remove();
     document.body.classList.remove('is-dragging');
   }
