@@ -67,11 +67,11 @@ html, body {
     }
 }
 
-/* === 页面整体：内容垂直居中 === */
+/* === 页面整体：内容偏上，下半留给背景呼吸 === */
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
     /* 后续可通过 JS 切换类名启动呼吸 */
     animation: breathe 8s ease-in-out infinite paused;
@@ -81,16 +81,16 @@ body.is-breathing {
     animation-play-state: running;
 }
 
-/* ---------- 4. 主容器（纯布局，无卡片样式） ---------- */
+/* ---------- 4. 主容器（纯布局，内容偏上） ---------- */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 24px;
+    gap: 0;
     width: 100%;
     max-width: 680px;
     padding: 0 24px;
+    margin-top: 14vh;
     text-align: center;
 }
 
@@ -100,6 +100,7 @@ body.is-breathing {
     align-items: center;
     justify-content: center;
     width: 100%;
+    margin-bottom: 28px;
 }
 
 .layer-search {
@@ -107,6 +108,7 @@ body.is-breathing {
     align-items: center;
     justify-content: center;
     width: 100%;
+    margin-bottom: 40px;
 }
 
 .layer-bookmark {
@@ -115,8 +117,8 @@ body.is-breathing {
 
 /* ---------- 5. 时钟 ---------- */
 #clock {
-    font-size: 72px;
-    font-weight: 200;
+    font-size: 52px;
+    font-weight: 300;
     color: var(--text-main);
     margin-bottom: 0;
     font-variant-numeric: tabular-nums;
@@ -196,7 +198,8 @@ body.is-breathing {
     position: relative;
     display: inline-block;
     width: 100%;
-    max-width: 640px;
+    min-width: 600px;
+    max-width: 720px;
     margin-bottom: 0;
 }
 
@@ -206,12 +209,12 @@ body.is-breathing {
     display: flex;
     align-items: center;
     width: 100%;
-    height: 48px;
+    height: 52px;
     padding: 4px 4px 4px 8px;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-pill);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 26px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     transition: box-shadow 0.4s ease-out, background 0.4s ease-out, border-color 0.4s ease-out;
 }
 
@@ -445,8 +448,16 @@ body.is-breathing {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 16px 20px;
+    gap: 28px 32px;
     width: 100%;
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.bookmark-grid::-webkit-scrollbar {
+    display: none;
 }
 
 /* 单个书签卡片 */
@@ -459,8 +470,8 @@ body.is-breathing {
 
 /* 圆形图标容器 */
 .bookmark-icon-wrap {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(10px);
@@ -483,10 +494,10 @@ body.is-breathing {
 
 /* === favicon 圆形适配 === */
 
-/* favicon 外层圆形遮罩（在 56px 容器内留出呼吸边距） */
+/* favicon 外层圆形遮罩（在 64px 容器内留出呼吸边距） */
 .bookmark-favicon-wrap {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -508,14 +519,14 @@ body.is-breathing {
 
 /* 首字母 fallback */
 .bookmark-initial {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: rgba(255, 183, 165, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     color: #5A4A42;
     line-height: 1;
@@ -530,7 +541,7 @@ body.is-breathing {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-top: 12px;
+    margin-top: 10px;
     letter-spacing: 0.02em;
     text-align: center;
 }
@@ -589,8 +600,8 @@ body.is-breathing {
 }
 
 .bookmark-add-btn {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(10px);
@@ -599,7 +610,7 @@ body.is-breathing {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: #5A4A42;
     cursor: pointer;
@@ -630,7 +641,7 @@ body.is-breathing {
     font-size: 13px;
     color: #5A4A42;
     opacity: 0.5;
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
 /* 空状态 */
@@ -846,15 +857,20 @@ body.is-breathing {
 @media (max-width: 480px) {
     .container {
         padding: 0 20px;
-        gap: 20px;
+        margin-top: 10vh;
     }
 
     #clock {
-        font-size: 48px;
+        font-size: 40px;
     }
 
     .search-box {
+        min-width: unset;
         max-width: 100%;
+    }
+
+    .search-field {
+        height: 48px;
     }
 
     .engine-name {
@@ -866,7 +882,12 @@ body.is-breathing {
     }
 
     #search {
-        padding: 12px 14px 12px 8px;
+        padding: 10px 14px 10px 8px;
+        font-size: 15px;
+    }
+
+    .bookmark-grid {
+        gap: 20px 24px;
     }
 
     .bookmark-icon-wrap {
@@ -876,12 +897,16 @@ body.is-breathing {
 
     .bookmark-favicon-wrap,
     .bookmark-initial {
-        width: 34px;
-        height: 34px;
+        width: 28px;
+        height: 28px;
     }
 
     .bookmark-initial {
-        font-size: 14px;
+        font-size: 12px;
+    }
+
+    .bookmark-name {
+        font-size: 10px;
     }
 
     .bookmark-add-btn {
