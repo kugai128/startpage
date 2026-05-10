@@ -267,7 +267,7 @@
         '<div class="bm-preview" id="bmPreview">' +
           '<div class="bookmark-initial" id="bmPreviewInitial">?</div>' +
         '</div>' +
-        '<input class="bm-field" id="bmName" placeholder="网站名称" maxlength="30">' +
+        '<input class="bm-field" id="bmName" placeholder="网站名称（可不填）" maxlength="30">' +
         '<input class="bm-field" id="bmUrl" placeholder="网址  https://...">' +
         '<button class="bm-submit" id="bmSubmit">保存</button>' +
         '<button class="bm-cancel" id="bmCancel">取消</button>' +
