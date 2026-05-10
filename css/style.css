@@ -216,10 +216,10 @@ body.is-breathing {
 /* ---------- 6. 搜索区域 ---------- */
 .search-box {
     position: relative;
-    display: inline-block;
+    display: block;
     width: 100%;
-    min-width: 600px;
-    max-width: 720px;
+    min-width: unset;
+    max-width: 100%;
     margin-bottom: 0;
 }
 
@@ -465,9 +465,10 @@ body.is-breathing {
 
 /* === 书签网格始终居中 === */
 .bookmark-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
+    align-content: start;
     gap: 28px 32px;
     width: 100%;
     min-height: 90px;
@@ -941,6 +942,12 @@ body.is-breathing {
         width: 48px;
         height: 48px;
         font-size: 24px;
+    }
+
+    .bookmark-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 
