@@ -230,6 +230,7 @@
     wrap.className = 'bookmark-icon-wrap';
     wrap.href = bm.url;
     wrap.setAttribute('aria-label', bm.name);
+    wrap.draggable = false;
 
     /* === favicon 圆形适配：多源 fallback + base64 缓存 + B站首字母兜底 === */
     if (!isBilibili(bm.url)) {
@@ -570,6 +571,8 @@
     if (e.target.closest('.bookmark-action')) return;
 
     var card = e.currentTarget;
+    // 阻止浏览器把 <a> 链接识别为可拖拽对象（拖到地址栏/桌面）
+    if (e.type === 'mousedown') e.preventDefault();
     var clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     var clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
 
