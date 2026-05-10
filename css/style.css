@@ -67,41 +67,31 @@ html, body {
     }
 }
 
-/* === 卡片加高与内部均匀分布 === */
+/* === 页面整体：内容垂直居中 === */
 body {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     min-height: 100vh;
     /* 后续可通过 JS 切换类名启动呼吸 */
     animation: breathe 8s ease-in-out infinite paused;
-    padding-bottom: 100px;
 }
 
 body.is-breathing {
     animation-play-state: running;
 }
 
-/* ---------- 4. 容器卡片（加高与均匀分布） ---------- */
+/* ---------- 4. 主容器（纯布局，无卡片样式） ---------- */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
-    width: 840px;
-    height: 340px;
-    padding: 32px 72px;
-    margin-top: 12vh;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 680px;
+    padding: 0 24px;
     text-align: center;
-
-    /* 半透明白色 + 毛玻璃 */
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(16px) saturate(1.2);
-    -webkit-backdrop-filter: blur(16px) saturate(1.2);
-
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 /* 三层纵向分区 */
@@ -121,12 +111,11 @@ body.is-breathing {
 
 .layer-bookmark {
     width: 100%;
-    overflow: hidden;
 }
 
 /* ---------- 5. 时钟 ---------- */
 #clock {
-    font-size: 42px;
+    font-size: 72px;
     font-weight: 200;
     color: var(--text-main);
     margin-bottom: 0;
@@ -207,7 +196,7 @@ body.is-breathing {
     position: relative;
     display: inline-block;
     width: 100%;
-    max-width: 520px;
+    max-width: 640px;
     margin-bottom: 0;
 }
 
@@ -217,6 +206,7 @@ body.is-breathing {
     display: flex;
     align-items: center;
     width: 100%;
+    height: 48px;
     padding: 4px 4px 4px 8px;
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -236,8 +226,8 @@ body.is-breathing {
 #search {
     flex: 1;
     min-width: 0;
-    padding: 10px 18px 10px 10px;
-    font-size: 15px;
+    padding: 12px 20px 12px 10px;
+    font-size: 16px;
     font-family: inherit;
     color: var(--text-main);
     background: transparent;
@@ -271,8 +261,8 @@ body.is-breathing {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 7px 10px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 14px;
     font-family: inherit;
     line-height: 1;
     color: var(--text-main);
@@ -455,16 +445,8 @@ body.is-breathing {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 12px 16px;
+    gap: 16px 20px;
     width: 100%;
-    max-height: 140px;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.bookmark-grid::-webkit-scrollbar {
-    display: none;
 }
 
 /* 单个书签卡片 */
@@ -477,8 +459,8 @@ body.is-breathing {
 
 /* 圆形图标容器 */
 .bookmark-icon-wrap {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(10px);
@@ -501,10 +483,10 @@ body.is-breathing {
 
 /* === favicon 圆形适配 === */
 
-/* favicon 外层圆形遮罩（48px，在 64px 容器内留出呼吸边距） */
+/* favicon 外层圆形遮罩（在 56px 容器内留出呼吸边距） */
 .bookmark-favicon-wrap {
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -526,14 +508,14 @@ body.is-breathing {
 
 /* 首字母 fallback */
 .bookmark-initial {
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: rgba(255, 183, 165, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 500;
     color: #5A4A42;
     line-height: 1;
@@ -542,13 +524,13 @@ body.is-breathing {
 
 /* 网站名称 */
 .bookmark-name {
-    font-size: 10px;
+    font-size: 12px;
     color: #5A4A42;
-    max-width: 60px;
+    max-width: 72px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-top: 10px;
+    margin-top: 12px;
     letter-spacing: 0.02em;
     text-align: center;
 }
@@ -556,8 +538,8 @@ body.is-breathing {
 /* 编辑 & 删除按钮 */
 .bookmark-action {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -575,8 +557,8 @@ body.is-breathing {
 }
 
 .bookmark-action svg {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     flex-shrink: 0;
 }
 
@@ -590,13 +572,13 @@ body.is-breathing {
 }
 
 .bookmark-edit {
-    bottom: 2px;
-    right: -2px;
+    bottom: 4px;
+    right: -4px;
 }
 
 .bookmark-delete {
-    bottom: -4px;
-    right: -8px;
+    bottom: -2px;
+    right: -10px;
 }
 
 /* 添加按钮 */
@@ -607,8 +589,8 @@ body.is-breathing {
 }
 
 .bookmark-add-btn {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(10px);
@@ -617,7 +599,7 @@ body.is-breathing {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     color: #5A4A42;
     cursor: pointer;
@@ -645,10 +627,10 @@ body.is-breathing {
 }
 
 .bookmark-add-label {
-    font-size: 12px;
+    font-size: 13px;
     color: #5A4A42;
     opacity: 0.5;
-    margin-top: 10px;
+    margin-top: 12px;
 }
 
 /* 空状态 */
@@ -863,15 +845,16 @@ body.is-breathing {
 /* ---------- 9. 响应式微调 ---------- */
 @media (max-width: 480px) {
     .container {
-        width: 90%;
-        height: 360px;
-        padding: 28px 24px;
-        border-radius: 20px;
-        margin-top: 8vh;
+        padding: 0 20px;
+        gap: 20px;
     }
 
     #clock {
-        font-size: 42px;
+        font-size: 48px;
+    }
+
+    .search-box {
+        max-width: 100%;
     }
 
     .engine-name {
@@ -879,11 +862,32 @@ body.is-breathing {
     }
 
     .engine-current {
-        padding: 7px 8px;
+        padding: 8px 8px;
     }
 
     #search {
-        padding: 10px 14px 10px 8px;
+        padding: 12px 14px 12px 8px;
+    }
+
+    .bookmark-icon-wrap {
+        width: 48px;
+        height: 48px;
+    }
+
+    .bookmark-favicon-wrap,
+    .bookmark-initial {
+        width: 34px;
+        height: 34px;
+    }
+
+    .bookmark-initial {
+        font-size: 14px;
+    }
+
+    .bookmark-add-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
     }
 }
 
