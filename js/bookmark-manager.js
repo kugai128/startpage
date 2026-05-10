@@ -19,9 +19,9 @@
   ];
 
   var FAVICON_SOURCES = [
-    function (domain) { return 'https://api.faviconkit.com/' + domain + '/64'; },
-    function (domain) { return 'https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://' + domain + '&size=64'; },
     function (domain) { return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'; },
+    function (domain) { return 'https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://' + domain + '&size=64'; },
+    function (domain) { return 'https://api.faviconkit.com/' + domain + '/64'; },
     function (domain) { return 'https://icons.duckduckgo.com/ip3/' + domain + '.ico'; }
   ];
 
@@ -77,28 +77,62 @@
     var sources = [];
     if (preferredSrc) sources.push(preferredSrc);
     FAVICON_SOURCES.forEach(function (fn) { sources.push(fn(domain)); });
-    function tryOne(idx) {
-      if (idx >= sources.length) { cb(''); return; }
-      var src = sources[idx];
-      var img = new Image();
-      // 不强制 crossOrigin，确保最大程度兼容各 favicon 源
-      img.onload = function () {
+
+    var resolved = false;
+    var pending = sources.length;
+    var images = [];
+    var timer = null;
+
+    function onResult(success, src, img) {
+      if (resolved) {
+        if (img) img.src = '';
+        return;
+      }
+      if (success) {
+        resolved = true;
+        clearTimeout(timer);
+        // 取消其他未完成的请求
+        images.forEach(function (item) {
+          if (item.img && item.img !== img) item.img.src = '';
+        });
         // 尝试缓存 base64，CORS 失败不影响显示
         try {
           var canvas = document.createElement('canvas');
           canvas.width = 64;
           canvas.height = 64;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, 64, 64);
+          canvas.getContext('2d').drawImage(img, 0, 0, 64, 64);
           var base64 = canvas.toDataURL('image/png');
           if (base64) setCachedFavicon(domain, base64);
         } catch (e) { /* CORS 限制，忽略 */ }
         cb(src);
-      };
-      img.onerror = function () { tryOne(idx + 1); };
-      img.src = src;
+        return;
+      }
+      pending--;
+      if (pending <= 0) {
+        resolved = true;
+        clearTimeout(timer);
+        cb('');
+      }
     }
-    tryOne(0);
+
+    // 全局超时 3 秒：所有源都没响应时直接 fallback
+    timer = setTimeout(function () {
+      if (!resolved) {
+        resolved = true;
+        images.forEach(function (item) {
+          if (item.img) item.img.src = '';
+        });
+        cb('');
+      }
+    }, 3000);
+
+    sources.forEach(function (src) {
+      var img = new Image();
+      images.push({ img: img, src: src });
+      img.onload = function () { onResult(true, src, img); };
+      img.onerror = function () { onResult(false, src, null); };
+      img.src = src;
+    });
   }
 
   var siteNameMap = {
