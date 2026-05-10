@@ -577,19 +577,15 @@
       el: card,
       startX: clientX,
       startY: clientY,
+      startTime: Date.now(),
       isDragging: false,
-      timer: null,
       clone: null,
       indicator: null,
       targetRef: null,
       insertBefore: true
     };
 
-    dragState.timer = setTimeout(function () {
-      if (dragState && dragState.el === card) {
-        startDrag(card, clientX, clientY);
-      }
-    }, 200);
+    startDrag(card, clientX, clientY);
 
     document.addEventListener('mousemove', onPointerMove);
     document.addEventListener('mouseup', onPointerUp);
@@ -598,55 +594,60 @@
   }
 
   function onPointerMove(e) {
-    if (!dragState) return;
+    if (!dragState || !dragState.isDragging) return;
     e.preventDefault();
 
     var clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
     var clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-
-    if (!dragState.isDragging) {
-      var dx = clientX - dragState.startX;
-      var dy = clientY - dragState.startY;
-      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-        clearTimeout(dragState.timer);
-        startDrag(dragState.el, clientX, clientY);
-      }
-      return;
-    }
 
     moveDrag(clientX, clientY);
   }
 
   function onPointerUp(e) {
     if (!dragState) return;
-    clearTimeout(dragState.timer);
 
     document.removeEventListener('mousemove', onPointerMove);
     document.removeEventListener('mouseup', onPointerUp);
     document.removeEventListener('touchmove', onPointerMove);
     document.removeEventListener('touchend', onPointerUp);
 
-    if (dragState.isDragging) {
-      var clientX, clientY;
-      if (e.type === 'touchend') {
-        var t = e.changedTouches[0];
-        clientX = t ? t.clientX : dragState.startX;
-        clientY = t ? t.clientY : dragState.startY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-      var gridRect = grid.getBoundingClientRect();
-      var margin = 80;
-      var outOfBounds = clientX < gridRect.left - margin || clientX > gridRect.right + margin ||
-                        clientY < gridRect.top - margin || clientY > gridRect.bottom + margin;
-      if (outOfBounds) {
-        cancelDrag();
-      } else {
-        endDrag();
-      }
-    } else {
+    if (!dragState.isDragging) {
       dragState = null;
+      return;
+    }
+
+    var clientX, clientY;
+    if (e.type === 'touchend') {
+      var t = e.changedTouches[0];
+      clientX = t ? t.clientX : dragState.startX;
+      clientY = t ? t.clientY : dragState.startY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    var dx = clientX - dragState.startX;
+    var dy = clientY - dragState.startY;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var duration = Date.now() - dragState.startTime;
+
+    // 位移极小且时间极短 → 视为点击（打开链接），不排序
+    if (dist < 3 && duration < 300) {
+      cancelDrag();
+      return;
+    }
+
+    // 拖拽：阻止后续 click 事件，避免放置后意外跳转
+    document.addEventListener('click', preventClickOnce, true);
+
+    var gridRect = grid.getBoundingClientRect();
+    var margin = 80;
+    var outOfBounds = clientX < gridRect.left - margin || clientX > gridRect.right + margin ||
+                      clientY < gridRect.top - margin || clientY > gridRect.bottom + margin;
+    if (outOfBounds) {
+      cancelDrag();
+    } else {
+      endDrag();
     }
   }
 
@@ -679,7 +680,6 @@
     dragState.indicator = indicator;
 
     document.body.classList.add('is-dragging');
-    document.addEventListener('click', preventClickOnce, true);
   }
 
   function preventClickOnce(e) {
@@ -776,6 +776,7 @@
   }
 
   function cancelDrag() {
+    document.removeEventListener('click', preventClickOnce, true);
     cleanupDragVisuals();
     dragState = null;
   }
@@ -786,7 +787,6 @@
     if (dragState.clone) dragState.clone.remove();
     if (dragState.indicator) dragState.indicator.remove();
     document.body.classList.remove('is-dragging');
-    document.removeEventListener('click', preventClickOnce, true);
   }
 
   function syncOrderToStorage() {
