@@ -51,14 +51,29 @@
 
   function applyBackground(type, value, controlTheme) {
     document.body.style.background = value;
+    // 同步更新 ambient-base 背景，避免固定层遮挡 body 背景
+    var ambientBase = document.querySelector('.ambient-base');
+    if (ambientBase) {
+      ambientBase.style.background = value;
+    }
     if (type === 'custom') {
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
       document.body.style.backgroundAttachment = '';
+      if (ambientBase) {
+        ambientBase.style.backgroundSize = 'cover';
+        ambientBase.style.backgroundPosition = 'center';
+        ambientBase.style.backgroundAttachment = '';
+      }
     } else {
       document.body.style.backgroundSize = '';
       document.body.style.backgroundPosition = '';
       document.body.style.backgroundAttachment = 'fixed';
+      if (ambientBase) {
+        ambientBase.style.backgroundSize = '';
+        ambientBase.style.backgroundPosition = '';
+        ambientBase.style.backgroundAttachment = 'fixed';
+      }
     }
     document.body.setAttribute('data-control-theme', controlTheme);
     updateThumbnailSelection(type);
