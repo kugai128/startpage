@@ -133,7 +133,8 @@ body,
     --text-sub: #b0a8a4;
     --text-placeholder: #8a807c;
     --text-dark: #f5f0ec;
-    --text-name: #e0d8d4;
+    --text-name: #c8c0bc;
+    --text-placeholder: rgba(232, 228, 225, 0.35);
 
     --accent: #e8a090;
     --accent-012: rgba(232, 160, 144, 0.15);
@@ -147,16 +148,16 @@ body,
 
     --white-03: rgba(255, 255, 255, 0.08);
     --white-04: rgba(255, 255, 255, 0.1);
-    --white-06: rgba(255, 255, 255, 0.12);
-    --white-065: rgba(255, 255, 255, 0.15);
-    --white-07: rgba(255, 255, 255, 0.15);
-    --white-075: rgba(255, 255, 255, 0.15);
-    --white-08: rgba(255, 255, 255, 0.15);
-    --white-085: rgba(255, 255, 255, 0.15);
-    --white-09: rgba(255, 255, 255, 0.2);
+    --white-06: rgba(255, 255, 255, 0.08);
+    --white-065: rgba(255, 255, 255, 0.10);
+    --white-07: rgba(255, 255, 255, 0.10);
+    --white-075: rgba(255, 255, 255, 0.10);
+    --white-08: rgba(255, 255, 255, 0.08);
+    --white-085: rgba(255, 255, 255, 0.12);
+    --white-09: rgba(255, 255, 255, 0.15);
 
-    --surface-modal: rgba(30, 30, 50, 0.7);
-    --surface-modal-strong: rgba(30, 30, 50, 0.85);
+    --surface-modal: rgba(255, 255, 255, 0.06);
+    --surface-modal-strong: rgba(255, 255, 255, 0.08);
 
     --shadow-warm-03: rgba(0, 0, 0, 0.2);
     --shadow-warm-05: rgba(0, 0, 0, 0.25);
@@ -179,7 +180,103 @@ body,
     --ambient-pink-0: rgba(120, 80, 140, 0);
 }
 
+/* === 深色模式通透感优化 === */
 
+/* 1. 托盘通透化 */
+[data-theme="dark"] .layer-bookmark {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* 2. 搜索框轻盈化 */
+[data-theme="dark"] .search-field {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme="dark"] .search-field:focus-within {
+    box-shadow: 0 0 0 1px rgba(255, 183, 165, 0.3), 0 0 20px rgba(255, 183, 165, 0.15);
+}
+
+/* 3. 图标容器浮出化 */
+[data-theme="dark"] .bookmark-icon-wrap {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .bookmark-card:hover .bookmark-icon-wrap {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* 4. 文字层级分明 */
+[data-theme="dark"] .bookmark-name {
+    color: #c8c0bc;
+}
+
+[data-theme="dark"] #search::placeholder {
+    color: rgba(232, 228, 225, 0.35);
+}
+
+[data-theme="dark"] .greeting-footer {
+    color: rgba(232, 228, 225, 0.25);
+}
+
+/* 5. 设置按钮 / 控件栏适配 */
+[data-theme="dark"] .theme-toggle {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e8e4e1;
+}
+
+[data-theme="dark"] .engine-current {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .engine-dropdown {
+    background: rgba(20, 20, 40, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .suggestions {
+    background: rgba(20, 20, 40, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* 6. 弹窗通透化 */
+[data-theme="dark"] .bm-modal {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .bm-field {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .bm-preview {
+    border-color: rgba(255, 183, 165, 0.3);
+}
+
+[data-theme="dark"] .bm-submit {
+    box-shadow: 0 4px 12px rgba(255, 183, 165, 0.2);
+}
+
+[data-theme="dark"] .bm-overlay {
+    background: rgba(10, 10, 25, 0.35);
+}
 
 /* 通用过渡 —— 仅颜色/阴影/透明度，transform 由各元素显式控制 */
 
