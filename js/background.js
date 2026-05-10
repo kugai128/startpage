@@ -8,12 +8,26 @@
   var BG_STORAGE_CONTROL = 'bg_control_theme';
 
   var PRESETS = [
-    { id: '棉花糖', name: '棉花糖', bg: 'linear-gradient(135deg, #e0f0f8 0%, #fff0f3 100%)', controlTheme: 'light' },
-    { id: '薄荷奶绿', name: '薄荷奶绿', bg: 'linear-gradient(135deg, #e0f8f0 0%, #f0f8ff 100%)', controlTheme: 'light' },
-    { id: '日落橙粉', name: '日落橙粉', bg: 'linear-gradient(135deg, #ffe8d6 0%, #ffd6e0 100%)', controlTheme: 'light' },
-    { id: '星空暗蓝', name: '星空暗蓝', bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', controlTheme: 'dark' },
-    { id: '深夜紫黑', name: '深夜紫黑', bg: 'linear-gradient(135deg, #0f0c29 0%, #302b63 100%)', controlTheme: 'dark' }
+    { id: '棉花糖', name: '棉花糖', bg: 'linear-gradient(135deg, #e0f0f8 0%, #fff0f3 100%)', controlTheme: 'light', type: 'light' },
+    { id: '薄荷奶绿', name: '薄荷奶绿', bg: 'linear-gradient(135deg, #e0f8f0 0%, #f0f8ff 100%)', controlTheme: 'light', type: 'light' },
+    { id: '日落橙粉', name: '日落橙粉', bg: 'linear-gradient(135deg, #ffe8d6 0%, #ffd6e0 100%)', controlTheme: 'light', type: 'light' },
+    { id: '星空暗蓝', name: '星空暗蓝', bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', controlTheme: 'dark', type: 'dark' },
+    { id: '深夜紫黑', name: '深夜紫黑', bg: 'linear-gradient(135deg, #0f0c29 0%, #302b63 100%)', controlTheme: 'dark', type: 'dark' }
   ];
+
+  function findPresetById(id) {
+    for (var i = 0; i < PRESETS.length; i++) {
+      if (PRESETS[i].id === id) return PRESETS[i];
+    }
+    return null;
+  }
+
+  function findFirstPresetByType(type) {
+    for (var i = 0; i < PRESETS.length; i++) {
+      if (PRESETS[i].type === type) return PRESETS[i];
+    }
+    return null;
+  }
 
   function loadBgType() {
     try { return localStorage.getItem(BG_STORAGE_TYPE); } catch (e) { return null; }
@@ -54,11 +68,25 @@
     var type = loadBgType();
     var value = loadBgValue();
     var controlTheme = loadControlTheme();
+    var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
 
     if (type && value) {
+      // 预设背景与当前主题不匹配时自动兜底
+      if (type.indexOf('preset:') === 0) {
+        var presetId = type.slice(7);
+        var preset = findPresetById(presetId);
+        if (preset && preset.type !== currentTheme) {
+          var target = findFirstPresetByType(currentTheme);
+          if (target) {
+            applyBackground('preset:' + target.id, target.bg, target.controlTheme);
+            saveBg('preset:' + target.id, target.bg, target.controlTheme);
+            return;
+          }
+        }
+      }
       applyBackground(type, value, controlTheme || 'light');
     } else {
-      var defaultPreset = PRESETS[0];
+      var defaultPreset = findFirstPresetByType(currentTheme) || PRESETS[0];
       applyBackground('preset:' + defaultPreset.id, defaultPreset.bg, defaultPreset.controlTheme);
     }
   }
@@ -102,8 +130,13 @@
   function renderThumbnails() {
     var grid = document.getElementById('bgThumbnails');
     if (!grid) return;
+    grid.innerHTML = '';
 
+    var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+
+    // 只渲染与当前主题匹配的预设
     PRESETS.forEach(function (p) {
+      if (p.type !== currentTheme) return;
       var thumb = document.createElement('div');
       thumb.className = 'bg-thumb';
       thumb.style.background = p.bg;
@@ -114,17 +147,11 @@
       thumb.addEventListener('click', function () {
         applyBackground(thumb.dataset.type, thumb.dataset.value, thumb.dataset.control);
         saveBg(thumb.dataset.type, thumb.dataset.value, thumb.dataset.control);
-        // 深色背景自动建议切换深色模式（可选联动）
-        if (thumb.dataset.control === 'dark') {
-          var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-          if (currentTheme === 'light') {
-            // 静默提示用户可手动切换，不强制
-          }
-        }
       });
       grid.appendChild(thumb);
     });
 
+    // 自定义上传按钮始终显示
     var addBtn = document.createElement('div');
     addBtn.className = 'bg-thumb bg-thumb-add';
     addBtn.textContent = '+';
@@ -134,6 +161,10 @@
       if (input) input.click();
     });
     grid.appendChild(addBtn);
+
+    // 同步当前选中状态
+    var currentType = loadBgType();
+    updateThumbnailSelection(currentType);
   }
 
   function onFileSelect(e) {
@@ -191,11 +222,29 @@
     });
   }
 
-  // 监听主题变化，同步面板按钮文字
+  // 监听主题变化，同步面板按钮文字 + 缩略图过滤 + 自动兜底
   var observer = new MutationObserver(function (mutations) {
     mutations.forEach(function (m) {
       if (m.attributeName === 'data-theme') {
+        var newTheme = document.documentElement.getAttribute('data-theme') || 'light';
         syncThemeBtnText();
+
+        // 若当前背景是预设且与新主题不匹配，自动切换到第一个匹配预设
+        var currentType = loadBgType();
+        if (currentType && currentType.indexOf('preset:') === 0) {
+          var presetId = currentType.slice(7);
+          var preset = findPresetById(presetId);
+          if (preset && preset.type !== newTheme) {
+            var target = findFirstPresetByType(newTheme);
+            if (target) {
+              applyBackground('preset:' + target.id, target.bg, target.controlTheme);
+              saveBg('preset:' + target.id, target.bg, target.controlTheme);
+            }
+          }
+        }
+
+        // 重新渲染缩略图列表（过滤当前主题）
+        renderThumbnails();
       }
     });
   });
