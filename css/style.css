@@ -137,7 +137,7 @@ body.is-breathing {
 
 /* ---------- 5. 时钟 ---------- */
 #clock {
-    font-size: 52px;
+    font-size: 44px;
     font-weight: 300;
     color: var(--text-main);
     margin-bottom: 0;
