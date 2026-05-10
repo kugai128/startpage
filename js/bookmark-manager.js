@@ -67,14 +67,23 @@
     }
   }
 
-  var URL_REGEX = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
-
   function normalizeUrl(url) {
     return url.trim().replace(/\n/g, '');
   }
 
   function isValidUrl(url) {
-    return URL_REGEX.test(normalizeUrl(url));
+    var clean = normalizeUrl(url);
+    if (!clean) return false;
+    var testUrl = clean;
+    if (!/^https?:\/\//i.test(testUrl)) {
+      testUrl = 'https://' + testUrl;
+    }
+    try {
+      new URL(testUrl);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function getDomain(url) {
