@@ -81,11 +81,18 @@
       if (idx >= sources.length) { cb(''); return; }
       var src = sources[idx];
       var img = new Image();
-      img.crossOrigin = 'anonymous';
+      // 不强制 crossOrigin，确保最大程度兼容各 favicon 源
       img.onload = function () {
-        imgToBase64(img, function (base64) {
+        // 尝试缓存 base64，CORS 失败不影响显示
+        try {
+          var canvas = document.createElement('canvas');
+          canvas.width = 64;
+          canvas.height = 64;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 64, 64);
+          var base64 = canvas.toDataURL('image/png');
           if (base64) setCachedFavicon(domain, base64);
-        });
+        } catch (e) { /* CORS 限制，忽略 */ }
         cb(src);
       };
       img.onerror = function () { tryOne(idx + 1); };
