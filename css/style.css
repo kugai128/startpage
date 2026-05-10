@@ -125,171 +125,179 @@ body,
 }
 
 [data-theme="dark"] {
-    --bg-start: #1a1a2e;
-    --bg-mid: #16213e;
-    --bg-end: #0f3460;
+    --bg-start: #252530;
+    --bg-mid: #2d2d3a;
+    --bg-end: #353540;
 
-    --text-main: #e8e4e1;
-    --text-sub: #b0a8a4;
-    --text-placeholder: #8a807c;
-    --text-dark: #f5f0ec;
-    --text-name: #c8c0bc;
-    --text-placeholder: rgba(232, 228, 225, 0.35);
+    --text-main: #e8ddd5;
+    --text-sub: #a8a098;
+    --text-placeholder: rgba(200, 190, 180, 0.4);
+    --text-dark: #f0e8e0;
+    --text-name: #c0b8b0;
 
-    --accent: #e8a090;
-    --accent-012: rgba(232, 160, 144, 0.15);
-    --accent-015: rgba(232, 160, 144, 0.2);
-    --accent-02: rgba(232, 160, 144, 0.25);
-    --accent-025: rgba(232, 160, 144, 0.3);
-    --accent-03: rgba(232, 160, 144, 0.35);
-    --accent-035: rgba(232, 160, 144, 0.4);
-    --accent-05: rgba(232, 160, 144, 0.5);
-    --accent-06: rgba(232, 160, 144, 0.6);
+    --accent: #c9a89a;
+    --accent-012: rgba(201, 168, 154, 0.15);
+    --accent-015: rgba(201, 168, 154, 0.2);
+    --accent-02: rgba(201, 168, 154, 0.25);
+    --accent-025: rgba(201, 168, 154, 0.3);
+    --accent-03: rgba(201, 168, 154, 0.35);
+    --accent-035: rgba(201, 168, 154, 0.4);
+    --accent-05: rgba(201, 168, 154, 0.5);
+    --accent-06: rgba(201, 168, 154, 0.6);
 
-    --white-03: rgba(255, 255, 255, 0.08);
-    --white-04: rgba(255, 255, 255, 0.1);
-    --white-06: rgba(255, 255, 255, 0.08);
-    --white-065: rgba(255, 255, 255, 0.10);
-    --white-07: rgba(255, 255, 255, 0.10);
-    --white-075: rgba(255, 255, 255, 0.10);
-    --white-08: rgba(255, 255, 255, 0.08);
-    --white-085: rgba(255, 255, 255, 0.12);
-    --white-09: rgba(255, 255, 255, 0.15);
+    --white-03: rgba(255, 245, 235, 0.08);
+    --white-04: rgba(255, 245, 235, 0.10);
+    --white-06: rgba(255, 245, 235, 0.10);
+    --white-065: rgba(255, 245, 235, 0.12);
+    --white-07: rgba(255, 245, 235, 0.12);
+    --white-075: rgba(255, 245, 235, 0.14);
+    --white-08: rgba(255, 245, 235, 0.10);
+    --white-085: rgba(255, 245, 235, 0.15);
+    --white-09: rgba(255, 245, 235, 0.20);
 
-    --surface-modal: rgba(255, 255, 255, 0.06);
-    --surface-modal-strong: rgba(255, 255, 255, 0.08);
+    --surface-modal: rgba(255, 245, 235, 0.06);
+    --surface-modal-strong: rgba(255, 245, 235, 0.09);
 
-    --shadow-warm-03: rgba(0, 0, 0, 0.2);
-    --shadow-warm-05: rgba(0, 0, 0, 0.25);
-    --shadow-warm-06: rgba(0, 0, 0, 0.3);
-    --shadow-warm-08: rgba(0, 0, 0, 0.35);
-    --shadow-warm-15: rgba(0, 0, 0, 0.3);
-    --shadow-warm-40: rgba(0, 0, 0, 0.5);
-    --shadow-cold-04: rgba(0, 0, 0, 0.3);
-    --shadow-cold-05: rgba(0, 0, 0, 0.3);
-    --shadow-cold-06: rgba(0, 0, 0, 0.3);
-    --shadow-cold-10: rgba(0, 0, 0, 0.4);
+    --shadow-warm-03: rgba(15, 12, 18, 0.25);
+    --shadow-warm-05: rgba(15, 12, 18, 0.3);
+    --shadow-warm-06: rgba(15, 12, 18, 0.35);
+    --shadow-warm-08: rgba(15, 12, 18, 0.4);
+    --shadow-warm-15: rgba(15, 12, 18, 0.35);
+    --shadow-warm-40: rgba(15, 12, 18, 0.55);
+    --shadow-cold-04: rgba(10, 10, 18, 0.35);
+    --shadow-cold-05: rgba(10, 10, 18, 0.35);
+    --shadow-cold-06: rgba(10, 10, 18, 0.35);
+    --shadow-cold-10: rgba(10, 10, 18, 0.45);
 
     --error: rgba(255, 120, 120, 0.8);
     --error-border: rgba(255, 120, 120, 0.3);
-    --scrollbar: rgba(180, 170, 160, 0.2);
+    --scrollbar: rgba(160, 150, 140, 0.25);
 
-    --ambient-blue: rgba(80, 120, 180, 0.15);
-    --ambient-blue-0: rgba(80, 120, 180, 0);
-    --ambient-pink: rgba(120, 80, 140, 0.15);
-    --ambient-pink-0: rgba(120, 80, 140, 0);
+    --ambient-blue: rgba(100, 130, 180, 0.12);
+    --ambient-blue-0: rgba(100, 130, 180, 0);
+    --ambient-pink: rgba(140, 110, 130, 0.12);
+    --ambient-pink-0: rgba(140, 110, 130, 0);
 }
 
 /* === 深色模式通透感优化 === */
 
 /* 1. 托盘通透化 */
 [data-theme="dark"] .layer-bookmark {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-modal);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 245, 235, 0.15);
+    box-shadow: 0 8px 32px var(--shadow-warm-05), inset 0 1px 0 rgba(255, 245, 235, 0.08);
 }
 
 /* 2. 搜索框轻盈化 */
 [data-theme="dark"] .search-field {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--white-08);
+    border: 1px solid var(--white-085);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
 
 [data-theme="dark"] .search-field:focus-within {
-    box-shadow: 0 0 0 1px rgba(255, 183, 165, 0.3), 0 0 20px rgba(255, 183, 165, 0.15);
+    border-color: rgba(160, 216, 239, 0.5);
+    box-shadow: 0 0 0 2px rgba(160, 216, 239, 0.3), 0 0 24px rgba(160, 216, 239, 0.15);
 }
 
 /* === 深色模式图标容器玻璃质感 === */
 [data-theme="dark"] .bookmark-icon-wrap {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 245, 235, 0.04);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 245, 235, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 245, 235, 0.08);
     transition: background 0.35s var(--ease-soft),
                 border-color 0.35s var(--ease-soft),
                 box-shadow 0.35s var(--ease-soft);
 }
 
 [data-theme="dark"] .bookmark-card:hover .bookmark-icon-wrap {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.06),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(255, 245, 235, 0.09);
+    border-color: rgba(255, 245, 235, 0.22);
+    box-shadow: 0 0 16px rgba(255, 245, 235, 0.05),
+                inset 0 1px 0 rgba(255, 245, 235, 0.12);
     transform: none;
 }
 
 [data-theme="dark"] .bookmark-card:active .bookmark-icon-wrap {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 245, 235, 0.05);
+    border-color: rgba(255, 245, 235, 0.15);
+    box-shadow: inset 0 2px 6px var(--shadow-warm-05);
     transform: none;
 }
 
 [data-theme="dark"] .bookmark-favicon {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 1px 2px var(--shadow-warm-05));
 }
 
 /* 4. 文字层级分明 */
 [data-theme="dark"] .bookmark-name {
-    color: #c8c0bc;
+    color: var(--text-name);
 }
 
 [data-theme="dark"] #search::placeholder {
-    color: rgba(232, 228, 225, 0.35);
+    color: var(--text-placeholder);
 }
 
 [data-theme="dark"] .greeting-footer {
-    color: rgba(232, 228, 225, 0.25);
+    color: var(--text-placeholder);
 }
 
 /* 5. 设置按钮 / 控件栏适配 */
 [data-theme="dark"] .engine-current {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--white-08);
+    border-color: var(--white-085);
+}
+
+[data-theme="dark"] .engine-current:hover {
+    background: rgba(160, 216, 239, 0.12);
+}
+
+[data-theme="dark"] .engine-current:focus-visible {
+    box-shadow: 0 0 0 3px rgba(160, 216, 239, 0.6);
 }
 
 [data-theme="dark"] .engine-dropdown {
-    background: rgba(20, 20, 40, 0.75);
+    background: rgba(35, 35, 48, 0.78);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 245, 235, 0.12);
 }
 
 [data-theme="dark"] .suggestions {
-    background: rgba(20, 20, 40, 0.7);
+    background: rgba(35, 35, 48, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 245, 235, 0.12);
 }
 
 /* 6. 弹窗通透化 */
 [data-theme="dark"] .bm-modal {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-modal);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 245, 235, 0.12);
 }
 
 [data-theme="dark"] .bm-field {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--white-08);
+    border-color: var(--white-085);
 }
 
 [data-theme="dark"] .bm-preview {
-    border-color: rgba(255, 183, 165, 0.3);
+    border-color: var(--accent-03);
 }
 
 [data-theme="dark"] .bm-submit {
-    box-shadow: 0 4px 12px rgba(255, 183, 165, 0.2);
+    box-shadow: 0 4px 12px var(--accent-02);
 }
 
 [data-theme="dark"] .bm-overlay {
-    background: rgba(10, 10, 25, 0.35);
+    background: rgba(18, 16, 24, 0.45);
 }
 
 /* 通用过渡 —— 仅颜色/阴影/透明度，transform 由各元素显式控制 */
@@ -1350,24 +1358,24 @@ body.is-dragging {
 
 /* 深色模式下的面板适配 */
 [data-theme="dark"] .settings-panel {
-    background: rgba(20, 20, 40, 0.75);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(35, 35, 48, 0.78);
+    border-color: rgba(255, 245, 235, 0.12);
 }
 
 [data-theme="dark"] .settings-theme-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: #e8e4e1;
+    background: rgba(255, 245, 235, 0.08);
+    border-color: rgba(255, 245, 235, 0.15);
+    color: var(--text-main);
 }
 
 [data-theme="dark"] .settings-theme-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 245, 235, 0.15);
 }
 
 [data-theme="dark"] .bg-thumb-add {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #b0a8a4;
+    background: rgba(255, 245, 235, 0.08);
+    border-color: rgba(255, 245, 235, 0.2);
+    color: var(--text-sub);
 }
 
 /* ---------- 9. 响应式微调 ---------- */
