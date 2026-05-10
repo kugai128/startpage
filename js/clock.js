@@ -60,5 +60,9 @@
   }
 
   build();
-  setInterval(tick, 1000);
+  var clockTimer = setInterval(tick, 1000);
+
+  window.addEventListener('beforeunload', function () {
+    clearInterval(clockTimer);
+  });
 })();

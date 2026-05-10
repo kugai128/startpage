@@ -33,11 +33,18 @@
   el.textContent = getGreeting();
 
   // 每小时自动刷新（带淡入淡出过渡）
-  setInterval(function () {
+  var greetingTimeout = null;
+  var greetingInterval = setInterval(function () {
     el.style.opacity = '0';
-    setTimeout(function () {
+    greetingTimeout = setTimeout(function () {
       el.textContent = getGreeting();
       el.style.opacity = '1';
+      greetingTimeout = null;
     }, 200);
   }, 3600000);
+
+  window.addEventListener('beforeunload', function () {
+    clearInterval(greetingInterval);
+    if (greetingTimeout) clearTimeout(greetingTimeout);
+  });
 })();

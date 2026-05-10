@@ -210,13 +210,29 @@
   }
 
   let lastTime = performance.now();
+  var rafId;
+
   function loop(now) {
+    if (!container.isConnected) return;
     const dt = Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
     particles.forEach(function (p) {
       p.update(dt);
     });
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
   }
-  requestAnimationFrame(loop);
+  rafId = requestAnimationFrame(loop);
+
+  window.addEventListener('beforeunload', function () {
+    cancelAnimationFrame(rafId);
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      cancelAnimationFrame(rafId);
+    } else {
+      lastTime = performance.now();
+      rafId = requestAnimationFrame(loop);
+    }
+  });
 })();
